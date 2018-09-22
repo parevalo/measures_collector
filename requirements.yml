@@ -27,6 +27,8 @@ dependencies:
     - ipython
     - ipyleaflet
     - ipywidgets
+    - flask
+    - flask-sqlalchemy
     # GEE
     - oauth2client
     - pycrypto
