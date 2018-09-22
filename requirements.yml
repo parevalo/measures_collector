@@ -1,0 +1,36 @@
+name: tst_online
+channels:
+    - conda-forge
+dependencies:
+    # Base
+    - python=3.6
+    - numpy
+    - scipy
+    # Statistics
+    - scikit-learn
+    - pandas
+    - geopandas
+    # GDAL AND IO
+    - rasterio>=1.0*
+    - fiona
+    - shapely
+    - pyproj
+    - gdal
+    - xarray>=0.10.7
+    # Plotting
+    - matplotlib
+    - bqplot
+    # Interactive
+    - jupyter
+    - jupyterlab
+    - notebook
+    - ipython
+    - ipyleaflet
+    - ipywidgets
+    # GEE
+    - oauth2client
+    - pycrypto
+    - pip:
+        - google-api-python-client
+        - earthengine-api
+        - git+git://github.com/USGS-EROS/lcmap-pyccd.git
