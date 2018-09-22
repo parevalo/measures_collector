@@ -5,11 +5,12 @@ In order to use the Google Earth Engine API you need to have an active account
 and set up authentication credentials as described [here](https://developers.google.com/earth-engine/python_install_manual).
 
 Widget and map interaction should work right away with a classic jupyter notebook.
-In order to use them with a JupyterLab notebook, two extensions are required. The
-second one requires [nodejs](https://nodejs.org/en/)
+In order to use them with a JupyterLab notebook, two extensions are required. 
+They can be installed with the commands below.
 
-- jupyter labextension install jupyter-leaflet
-- jupyter labextension install @jupyter-widgets/jupyterlab-manager
+- `jupyter labextension install jupyter-leaflet`
+- `jupyter labextension install @jupyter-widgets/jupyterlab-manager`
 
 
+The second extension requires [nodejs](https://nodejs.org/en/).
 
