@@ -29,10 +29,12 @@ dependencies:
     - ipywidgets
     - flask
     - flask-sqlalchemy
+    - gspread
     # GEE
     - oauth2client
     - pycrypto
     - pip:
+        - appmode
         - google-api-python-client
         - earthengine-api
         - git+git://github.com/USGS-EROS/lcmap-pyccd.git
