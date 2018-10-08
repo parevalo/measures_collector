@@ -30,6 +30,7 @@ dependencies:
     - flask
     - flask-sqlalchemy
     - gspread
+    - qgrid
     # GEE
     - oauth2client
     - pycrypto
