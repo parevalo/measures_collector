@@ -11,6 +11,7 @@ They can be installed with the commands below.
 - `jupyter labextension install jupyter-leaflet`
 - `jupyter labextension install @jupyter-widgets/jupyterlab-manager`
 - `jupyter labextension install bqplot`
+- `jupyter labextension install qgrid`
 
 
 The second extension requires [nodejs](https://nodejs.org/en/).

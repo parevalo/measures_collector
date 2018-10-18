@@ -50,7 +50,7 @@ image = ee.Image('srtm90_v4')
 print(image.getInfo())
 ```
 
-You should se the metadata for an image
+You should see the metadata for an image
 
 # Step 6: Run the notebook
 
