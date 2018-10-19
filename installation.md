@@ -52,9 +52,22 @@ print(image.getInfo())
 
 You should see the metadata for an image
 
+# Step 6: Install Google Sheets API
+
+Google Sheets API
+
+Create a a Google Sheet in the NASA_MEaSUREs/TRAINING DATA/Sheets Drive folder: https://drive.google.com/drive/folders/1ZWSXT5WLBIpO2sfUjEBckrAyaGrtr9I2?usp=sharing
+
+'Share' the Sheet with the following email address for authentification: measuresbu@sturdy-dogfish-219917.iam.gserviceaccount.com
+
+Download the .json credential file from the project's Google Drive: https://drive.google.com/file/d/1q4R39wJ8NY5wrxMU2hyYAmqnEw5ZwyEb/view?usp=sharing
+
+Put the credential file in a directory you will remember, and take note of the pull path to the file.  
+
 # Step 6: Run the notebook
 
 Start a jupyter notebook and open the notebook you need
 
 `jupyter notebook`
+
 
