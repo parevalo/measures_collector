@@ -56,7 +56,7 @@ You should see the metadata for an image
 
 See the instructions on the Google Drive for setting up Google Sheets with the project credentials. 
 
-# Step 6: Run the notebook
+# Step 7: Run the notebook
 
 Start a jupyter notebook and open the notebook you need
 
