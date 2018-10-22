@@ -52,9 +52,14 @@ print(image.getInfo())
 
 You should see the metadata for an image
 
-# Step 6: Run the notebook
+# Step 6: Install Google Sheets API
+
+See the instructions on the Google Drive for setting up Google Sheets with the project credentials. 
+
+# Step 7: Run the notebook
 
 Start a jupyter notebook and open the notebook you need
 
 `jupyter notebook`
+
 
