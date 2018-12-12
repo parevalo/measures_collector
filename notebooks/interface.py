@@ -153,35 +153,23 @@ class interface(object):
                     description='Notes:', layout=widgets.Layout(width='70%'), disabled=False)
 
     # Spreadsheet information
-#     spreadsheet = widgets.Text(value='Google Spreadsheet Credential JSON',
-#                     placeholder='Google Spreadsheet Credential JSON',
-#                     description='Credentials:',disabled=False,
-#                     continuous_update=True)
-
-    spreadsheet = widgets.Text(value='MEaSUREs-9dc49ca010f9.json',
-                    placeholder='MEaSUREs-9dc49ca010f9.json',
+    spreadsheet = widgets.Text(value='Google Spreadsheet Credential JSON',
+                    placeholder='Google Spreadsheet Credential JSON',
                     description='Credentials:',disabled=False,
                     continuous_update=True)
+
     # MEaSUREs_ELB
-#     spreadName = widgets.Text(value='Google Spreadsheet Name',
-#                     placeholder='Google Spreadsheet Name', description='Name:',
-#                     disabled=False, continuous_update=True)
-    spreadName = widgets.Text(value='MEaSUREs_ELB',
-                    placeholder='MEaSUREs_ELB', description='Name:',
+    spreadName = widgets.Text(value='Google Spreadsheet Name',
+                    placeholder='Google Spreadsheet Name', description='Name:',
                     disabled=False, continuous_update=True)
     # Sample path
-#     sampleWidget = widgets.Text(value='Path to sample feature collection',
-#                 description='Path:',
-#                 disabled=False, continuous_update=True)
-    sampleWidget = widgets.Text(value='users/parevalo_bu/sample_13_15_labels_pts',
+    sampleWidget = widgets.Text(value='Path to sample feature collection',
                 description='Path:',
                 disabled=False, continuous_update=True)
     def __init__(self):
         interface.sample_path = None
         interface.sheet = None
     def reset_drops():
-#         interface.drop2.set_trait('options', ['Decision 4'])
-#         interface.drop3.set_trait('options', ['Decision 3'])
         interface.drop4.set_trait('options', ['Decision 4'])
         interface.drop5.set_trait('options', ['Decision 5'])
         interface.drop6.set_trait('options', ['Decision 6'])
@@ -303,11 +291,8 @@ class interface(object):
     drop3.observe(drop3_clicked, 'value')
     drop4.observe(drop4_clicked, 'value')
     drop5.observe(drop5_clicked, 'value')
-#     drop6.observe(drop6_clicked, 'value')
 
     break_cb.observe(turn_on_break_years)
-    # Call function save_sample when clicking save button
-    #save_button.on_click(save_sample)
 
     # Load database and sample
     load_button.on_click(load_everything)
