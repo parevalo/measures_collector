@@ -84,9 +84,27 @@ def save_sample(interface, Plot_interface):
     location = 'N/A'
 
     condition = interface.drop9.value
+    coverType = interface.drop0.value
     changeAgent = interface.change_selector.value
     changeAgent = [str(i) for i in changeAgent]
     changeAgent = ', '.join(changeAgent)
+    if changeAgent != 'None':
+        confCA = interface.ca_confidence.value
+        break_year = interface.break_year.value
+        break_range1 = interface.break_years.value[0]
+        break_range2 = interface.break_years.value[1]
+    else:
+        confCA = 'N/A'
+        break_year = 'N/A'
+        break_range1 = 'N/A'
+        break_range2 = 'N/A'
+    ca_other = interface.change_other.value
+    if ca_other == 'Specify other':
+        ca_other = 'N/A'
+
+    direction = interface.direction.value
+    direction = [str(i) for i in direction]
+    direction = ', '.join(direction)
 
     class1 = 'Unfilled'
 
@@ -108,6 +126,9 @@ def save_sample(interface, Plot_interface):
                 impervious = interface.drop8.value
         elif interface.drop2.value == 'Yes': #Veg
             density = interface.drop3.value
+            vegType1 = interface.veg_selector.value
+            vegType1 = [str(i) for i in vegType1]
+            vegType1 = ', '.join(vegType1)
             if interface.drop5.value == 'No': #Herbaceous
                 class1 = 'Herbaceous'
                 herbaceousType = interface.drop6.value
@@ -123,14 +144,15 @@ def save_sample(interface, Plot_interface):
     lat = Plot_interface.m.center[0]
     lon = Plot_interface.m.center[1]
 
-    sampleInput = (idSample, lat, lon, year1, year2, condition,
-                   changeAgent, class1, waterType, bareType, albedo,
-                   use, height, transport, impervious, density,
-                   vegType1, herbaceousType, shrubType, forestPhenology,
-                   leafType, location, conf, notes_value)
+    sampleInput = (idSample, lat, lon, year1, year2, direction, coverType, condition,
+                       changeAgent, ca_other, confCA, class1, waterType,
+                       bareType, albedo, use, height, transport, impervious, density,
+                       vegType1, herbaceousType, shrubType, forestPhenology, leafType,
+                       location, conf, notes_value, break_year, break_range1, break_range2)
+
 
     # Put sample information into database
-    c.execute("""insert into sample4
+    c.execute("""insert into measures
               values {i}""".format(i=sampleInput))
 
     # Save (commit) the changes
@@ -147,10 +169,26 @@ def save_sample(interface, Plot_interface):
     interface.years.set_trait('value',[2012, 2015])
 
     # Save to drive
-    sampleInputList = [str(idSample), str(lat), str(lon), str(year1), str(year2), condition, changeAgent, class1, waterType,
+    sampleInputList = [str(idSample), str(lat), str(lon), str(year1), str(year2), direction, coverType, condition,
+                       changeAgent, ca_other, confCA, class1, waterType,
                        bareType, albedo, use, height, transport, impervious, density,
                        vegType1, herbaceousType, shrubType, forestPhenology, leafType, location, conf, notes_value]
-    interface.sheet.insert_row(sampleInputList, 2)
+
+    sampleInputListFull = sampleInputList
+
+    # This did not work:
+    #emptyInput = ['N/A'] * len(sampleInputList)
+
+    #if interface.drop0.value == 'Dominant':
+    #    sampleInputListFull = sampleInputList + emptyInput
+    #elif interface.drop0.value == 'Secondary':
+    #    sampleInputListFull = emptyInput + sampleInputList
+    interface.sheet.insert_row(sampleInputListFull, 2)
+
+   # Save break information to second sheet
+    if condition == 'Break':
+        breakList = [str(idSample), str(lat), str(lon), changeAgent, ca_other, confCA, break_year, break_range1, break_range2]
+        interface.sheet2.insert_row(breakList, 2)
 
 def get_df_full(collection, coords):
     point = ee.Geometry.Point(coords)

@@ -50,16 +50,18 @@ class interface(object):
 
     # Set up database
     current_id = 0
-    dbPath = os.getcwd() + '/sample_database_4'
+    dbPath = os.getcwd() + '/measures_database'
     if not os.path.isfile(dbPath):
         conn = sqlite3.connect(dbPath)
         c = conn.cursor()
-        c.execute('''CREATE TABLE sample4
-                 (id text, lat text, lon text, year1 text, year2 text, condition text, change text,
+        c.execute('''CREATE TABLE measures
+                 (id text, lat text, lon text, year1 text, year2 text, direction text, coverType text,
+                 condition text, change text, chaOther text, confCA text,
                  class text, water text, bare text, albedo text, use text,
                  height text, transport text, impervious text, density text,
                  vegType1 text, herbaceous text, shrub text, forestPhenology text,
-                 leafType text, location text, confidence real, notes text)''')
+                 leafType text, location text, confidence real, notes text,
+                 byear text, brange1 text, brange2 text)''')
         print('Database created')
 
 
@@ -71,30 +73,33 @@ class interface(object):
 
     # Dropdown hierachy
     drop1 = widgets.Dropdown(options=['Persistant Ice?','Yes', 'No'],
-                value='Persistant Ice?', description='Decision 1', disabled=False)
+                value='Persistant Ice?', description='Decision 2', disabled=False)
 
-    drop2 = widgets.Dropdown(options=['Decision 2'],
-                value='Decision 2', description='Decision 2', disabled=False)
-
-    drop3 = widgets.Dropdown(options=['Decision 3'],
+    drop2 = widgets.Dropdown(options=['Decision 3'],
                 value='Decision 3', description='Decision 3', disabled=False)
 
-    drop4 = widgets.Dropdown(options=['Decision 4'],
+    drop3 = widgets.Dropdown(options=['Decision 4'],
                 value='Decision 4', description='Decision 4', disabled=False)
 
-    drop5 = widgets.Dropdown(options=['Decision 5'],
+    drop4 = widgets.Dropdown(options=['Decision 5'],
                 value='Decision 5', description='Decision 5', disabled=False)
 
-    drop6 = widgets.Dropdown(options=['Decision 6'],
+    drop5 = widgets.Dropdown(options=['Decision 6'],
                 value='Decision 6', description='Decision 6', disabled=False)
 
-    drop7 = widgets.Dropdown(options=['Decision 7'],
+    drop6 = widgets.Dropdown(options=['Decision 7'],
                 value='Decision 7', description='Decision 7', disabled=False)
-    drop8 = widgets.Dropdown(options=['Decision 8'],
-                value='Decision 8', description='Decision 8', disabled=False)
 
-    drop9 = widgets.Dropdown(options=['Select Label','Stable','Transitional','Break'],
-                value='Select Label', description='Label Type:', disabled=False)
+    drop7 = widgets.Dropdown(options=['Decision 8'],
+                value='Decision 8', description='Decision 8', disabled=False)
+    drop8 = widgets.Dropdown(options=['Decision 9'],
+                value='Decision 9', description='Decision 9', disabled=False)
+
+    drop9 = widgets.Dropdown(options=['Stable','Transitional','Break'],
+                value='Stable', description='Label Type:', disabled=False)
+
+    drop0 = widgets.Dropdown(options=['Dominant or Secondary?','Dominant','Secondary'],
+                value='Dominant or Secondary?', description='Decision 1', disabled=False)
     veg_selector = widgets.SelectMultiple(
                         options=['Veg Type','Cropland', 'Plantation', 'Wetland', 'Riparian/Flood'],
                         value=['Veg Type'],
@@ -110,18 +115,25 @@ class interface(object):
                         description='Change Agent:',
                         disabled=False
                       )
+
+    direction = widgets.SelectMultiple(
+                        options=['None','Veg Increase','Veg Decrease','Water Increase','Water Decrease',
+                                 'Bare Increase','Bare Decrease','Urban Increase','Urban Decrease',
+                                 'Albedo Increase','Albedo Decrease'],
+                        value=['None'],
+                        # rows=10,
+                        description='Directional Change:',
+                        disabled=False
+                      )
     change_other = widgets.Text(value='Specify other',
                     placeholder='Specify other', description='Other:',
                     disabled=False, continuous_update=True)
 
-    # Break versus transitional check box
-    break_cb = widgets.Checkbox(
-                    value=False,
-                    description='Break Label?',
-                    disabled=False
-    )
+    break_year = widgets.IntSlider(value=2013, min=1990, max=2018,
+                    step=1, description='Break Year:', disabled=True, continuous_update=False,
+                    orientation='horizontal', readout=True, readout_format='d')
     break_years = widgets.IntRangeSlider(value=[2012, 2015], min=1990, max=2018,
-                    step=1, description='Break Years:', disabled=True, continuous_update=False,
+                    step=1, description='Break Range:', disabled=True, continuous_update=False,
                     orientation='horizontal', readout=True, readout_format='d')
 
     # Display current validity of sample
@@ -147,6 +159,10 @@ class interface(object):
                     disabled=False, continuous_update=False, orientation='horizontal',
                     readout=True, readout_format='d')
 
+    ca_confidence = widgets.IntSlider(value=0, min=0, max=3, step=1, description='',
+                        disabled=False, continuous_update=False, orientation='horizontal',
+                        readout=True, readout_format='d')
+
     # Notes
     notes = widgets.Textarea(value='Enter any useful or interesting information about the sample.',
                     placeholder='Enter any useful or interesting information about the sample',
@@ -169,6 +185,7 @@ class interface(object):
     def __init__(self):
         interface.sample_path = None
         interface.sheet = None
+        interface.sheet2 = None
     def reset_drops():
         interface.drop4.set_trait('options', ['Decision 4'])
         interface.drop5.set_trait('options', ['Decision 5'])
@@ -261,7 +278,9 @@ class interface(object):
         scope = ['https://spreadsheets.google.com/feeds' + ' ' +'https://www.googleapis.com/auth/drive']
         creds = ServiceAccountCredentials.from_json_keyfile_name(interface.spreadsheet.value, scope)
         client = gspread.authorize(creds)
-        interface.sheet = client.open(interface.spreadName.value).sheet1
+        #interface.sheet = client.open(interface.spreadName.value).sheet1
+        interface.sheet = client.open(interface.spreadName.value).get_worksheet(0)
+        interface.sheet2 = client.open(interface.spreadName.value).get_worksheet(1)
         interface.sample_path = ee.FeatureCollection(interface.sampleWidget.value)
         interface.fc_df = interface.fc2dfgeo(interface.sample_path)
         if 'ID' not in interface.fc_df.columns:
@@ -274,11 +293,13 @@ class interface(object):
         interface.valid_load.description='Loaded!'
         interface.current_id = first_index - 1
 
-    def turn_on_break_years(a):
-        if interface.break_years.disabled == True:
+    def turn_on_break_years(selection):
+        if selection.new == 'Break':
             interface.break_years.disabled = False
+            interface.break_year.disabled = False
         else:
             interface.break_years.disabled = True
+            interface.break_year.disabled = True
 
     # Handle widget interactions
     # Call function check_val_status when button is clicked
@@ -292,7 +313,7 @@ class interface(object):
     drop4.observe(drop4_clicked, 'value')
     drop5.observe(drop5_clicked, 'value')
 
-    break_cb.observe(turn_on_break_years)
+    drop9.observe(turn_on_break_years, 'value')
 
     # Load database and sample
     load_button.on_click(load_everything)

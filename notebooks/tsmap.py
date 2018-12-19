@@ -359,10 +359,10 @@ class Plot_interface(object):
         # Update the table based on current ID
 
         # Get header
-        cursor = Plot_interface.c.execute('select * from sample4')
+        cursor = Plot_interface.c.execute('select * from measures')
         names = list(map(lambda x: x[0], cursor.description))
         previous_inputs = pd.DataFrame()
-        for i, row in enumerate(Plot_interface.c.execute("SELECT * FROM sample4 WHERE id = '%s'" % Plot_interface.current_id)):
+        for i, row in enumerate(Plot_interface.c.execute("SELECT * FROM measures WHERE id = '%s'" % Plot_interface.current_id)):
             previous_inputs[i] = row
         previous_inputs = previous_inputs.T
         if previous_inputs.shape[0] > 0:
