@@ -1,6 +1,6 @@
 # Step 1: Clone repo
 
-`git clone https://github.com/parevalo/tstools_online.git`
+`git clone git@github.com:bullocke/tstools_online.git`
 
 # Step 2: Get anaconda or miniconda
 
@@ -11,9 +11,9 @@ If you already have it installed, skip to the next step.
 # Step 3: Create a conda environment
 
 Locate the newly created folder and the requirements.yml file. Then
-create a new conda environment specifying the name you want (e.g. tst_online).
+create a new conda environment specifying the name you want (e.g. tstools_online).
 
-`conda env create -n tst_online -f requirements.yml`
+`conda env create -n tstools_online -f requirements.yml`
 
 The newly created environment will contain all the requirements, including
 the Google Earth Engine (GEE) API and its dependencies.
