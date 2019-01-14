@@ -1,4 +1,5 @@
 import sqlite3
+import numpy as np
 import ee
 import pandas as pd
 import datetime
@@ -58,9 +59,11 @@ def get_full_collection(coords, year_range, doy_range):
     return all_scenes
 
 
+# Utility function for calculating spectral indices
 def doIndices(fullImage):
-  # Utility function for calculating spectral indices */
+
   image = fullImage.select(['BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2'])
+
   # Parameters
   cfThreshold = 20000
   soil = [2000, 3000, 3400, 5800, 6000, 5800]
@@ -180,8 +183,8 @@ def save_amazon(interface, Plot_interface):
     interface.reset_widgets()
 
 
+# Old: save sample to database
 def save_sample(interface, Plot_interface):
-    """ Save the sample to the database """
     # Connect to the database
     conn = sqlite3.connect(interface.dbPath)
     c = conn.cursor()
@@ -298,13 +301,6 @@ def save_sample(interface, Plot_interface):
 
     sampleInputListFull = sampleInputList
 
-    # This did not work:
-    #emptyInput = ['N/A'] * len(sampleInputList)
-
-    #if interface.drop0.value == 'Dominant':
-    #    sampleInputListFull = sampleInputList + emptyInput
-    #elif interface.drop0.value == 'Secondary':
-    #    sampleInputListFull = emptyInput + sampleInputList
     interface.sheet.insert_row(sampleInputListFull, 2)
 
    # Save break information to second sheet
@@ -312,7 +308,9 @@ def save_sample(interface, Plot_interface):
         breakList = [str(idSample), str(lat), str(lon), changeAgent, ca_other, confCA, break_year, break_range1, break_range2]
         interface.sheet2.insert_row(breakList, 2)
 
+# Get time series for location as a pandas dataframe
 def get_df_full(collection, coords):
+
     point = ee.Geometry.Point(coords)
     # Sample for a time series of values at the point.
     geom_values = collection.filterBounds(point).getRegion(geometry=point, scale=30)
@@ -327,11 +325,13 @@ def get_df_full(collection, coords):
     data.set_index('time')
     data = data.sort_values('datetime')
     data['ord_time'] = data['datetime'].apply(datetime.date.toordinal)
-    #data = data[['id', 'datetime', 'ord_time', 'NDFI','EVI','NDVI','Shade','Soil','NPV','GV','BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2', 'THERMAL', 'pixel_qa', 'doy', 'color']]
-    data = data[['id', 'datetime', 'ord_time', 'BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2', 'THERMAL', 'pixel_qa', 'doy', 'color']]
+    data = data[['id', 'datetime', 'ord_time', 'BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1',
+                'SWIR2', 'THERMAL', 'pixel_qa', 'doy', 'color']]
     return data
 
+# make color list for all 365 days of year
 def get_color_list():
+
     colors = [['#000000'] * 79 \
              + ['#41b6c4'] * 93 \
              + ['#41ab5d'] * 94 \
@@ -341,16 +341,19 @@ def get_color_list():
     return colors
 
 
+# Get the URL for an earth engine image. TODO: Wrong file
 def GetTileLayerUrl(ee_image_object):
+
     map_id = ee.Image(ee_image_object).getMapId()
     tile_url_template = "https://earthengine.googleapis.com/map/{mapid}/{{z}}/{{x}}/{{y}}?token={token}"
     return tile_url_template.format(**map_id)
 
 
 # Old
+# Convert a FeatureCollection into a pandas DataFrame
+# Features is a list of dict with the output
 def fc2df(fc):
-    # Convert a FeatureCollection into a pandas DataFrame
-    # Features is a list of dict with the output
+
     features = fc.getInfo()['features']
     dictarr = []
     for f in features:
@@ -360,22 +363,10 @@ def fc2df(fc):
 
     return pd.DataFrame(dictarr)
 
-# Calculate period statistics, seems to work but it's so ugly!
-def calc_period_stats(yr_list, collection, reducer, stat_name, bands):
-    def auxfnc(year):
-        start = ee.Date(year)
-        end = start.advance(step, 'year').advance(-1, 'day')
-
-        return collection\
-        .select(bands)\
-        .filterDate(start, end)\
-        .reduce(reducer)\
-        .set({'system:time_start': start, 'system:time_end': end, 'statistic': stat_name})
-    period_stats = yr_list.map(auxfnc)
-    return period_stats
-
-
+# Old
+# Get time series for a location as a pandas dataframe
 def get_df(collection, coords, band):
+
     point = ee.Geometry.Point(coords)
     # Sample for a time series of values at the point.
     geom_values = collection.filterBounds(point).select(band).getRegion(geometry=point, scale=30)
@@ -389,6 +380,8 @@ def get_df(collection, coords, band):
     data = data[['id', 'datetime', band]]
     return data
 
+# Old (no longer used)
+# Get time series for location in format to use in pyccd
 def make_df_pyccd(collection, point):
     band_list = ['BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2','THERMAL', 'pixel_qa']
     rename_list = ['BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2','THERMAL', 'pixel_qa']
@@ -404,14 +397,17 @@ def make_df_pyccd(collection, point):
     df['time'] = time_new
     return df
 
+# Append two dataframes
 def update_df(df, df2):
+
     df = df.append(df2)
     return df
 
 
+# Convert a FeatureCollection into a geopandas DataFrame
+# Features is a list of dict with the output
 def fc2dfgeo(fc):
-    # Convert a FeatureCollection into a pandas DataFrame
-    # Features is a list of dict with the output
+
     features = ee.FeatureCollection(fc).getInfo()['features']
 
     dictarr = []
@@ -440,6 +436,7 @@ def check_id(fc_df):
 
 # Plot TS from clicked point
 def handle_draw(action, geo_json, current_band, year_range, doy_range):
+
     # Get the selected coordinates from the map's drawing control.
     coords = geo_json['geometry']['coordinates']
     click_col = get_full_collection(coords, year_range, doy_range)

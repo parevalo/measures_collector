@@ -5,8 +5,23 @@ import numpy as np
 import datetime
 
 # Plot pyccd results for pixel
-def plot_pyccd(results, band, plotband, dates, yl, ylabel, ts_type,
-               scatter_ts, scatter_ts_breaks):
+def plot_pyccd(dfPyCCD, results, band, yl, scatter_ts, scatter_ts_breaks):
+
+    dates = np.array(dfPyCCD['ord_time'])
+    blues = np.array(dfPyCCD['BLUE'])
+    greens = np.array(dfPyCCD['GREEN'])
+    reds = np.array(dfPyCCD['RED'])
+    nirs = np.array(dfPyCCD['NIR'])
+    swir1s = np.array(dfPyCCD['SWIR1'])
+    swir2s = np.array(dfPyCCD['SWIR2'])
+    thermals = np.array(dfPyCCD['THERMAL'])
+    qas = np.array(dfPyCCD['pixel_qa'])
+
+    band_names = ['Blue SR', 'Green SR', 'Red SR', 'NIR SR', 'SWIR1 SR', 'SWIR2 SR','THERMAL']
+    plotlabel = band_names[band]
+
+    plot_arrays = [blues, greens, reds, nirs, swir1s, swir2s]
+    plotband = plot_arrays[band]
 
     predicted_values = []
     prediction_dates = []
@@ -47,8 +62,8 @@ def plot_pyccd(results, band, plotband, dates, yl, ylabel, ts_type,
 
     scatter_ts.x = _x
     scatter_ts.y = _y
-    scatter_ts_breaks.lc5.x = np.array(break_dates_plot, dtype='datetime64')
-    scatter_ts_breaks.lc5.y = break_y
+    scatter_ts_breaks.x = np.array(break_dates_plot, dtype='datetime64')
+    scatter_ts_breaks.y = break_y
 
 # Run pyccd for a pixel
 def run_pyccd(pyccd_flag, display_legend, dfPyCCD, band_index):

@@ -9,8 +9,8 @@ def drop1_clicked(selection, drop2, drop3):
         drop2.set_trait('options', ['Ice/Snow'])
         drop3.set_trait('options', ['No other information needed'])
 
+# Change other dropdowns based on selection of drop2
 def drop2_clicked(selection, drop2, drop3, drop4, drop5, drop6, drop7, drop8, veg_selector):
-    """ Generate vegetation class information after initial class is chosen """
     if '>30% Vegetated?' in drop2.options:
         if selection.new == 'Yes':
             drop3.set_trait('options', ['Density','Closed (60-70%)', 'Open (30-60%)', 'Sparse (<30%)'])
@@ -28,8 +28,8 @@ def drop2_clicked(selection, drop2, drop3, drop4, drop5, drop6, drop7, drop8, ve
     else:
         drop3.set_trait('options', ['No Other Information Needed'])
 
+# Change other dropdowns based on selection of drop3
 def drop3_clicked(selection, drop3, drop4, drop5, drop6, drop7, drop8, veg_selector):
-    """ Generate third class selector after initial class is chosen """
     if 'Dominant Cover?' in drop3.options:
         veg_selector.disabled = True
         if selection.new == 'Water':
@@ -43,16 +43,16 @@ def drop3_clicked(selection, drop3, drop4, drop5, drop6, drop7, drop8, veg_selec
             drop7.set_trait('options', ['Transport','Road','Not Applicable'])
             drop8.set_trait('options', ['% Impervious','High (60-100)','Medium (30-60)','Low (<30)'])
 
+# Change other dropdowns based on selection of drop4
 def drop4_clicked(selection, drop4, drop5):
-    """ Generate fourth class selector after initial class is chosen """
     if 'Trees?' in drop4.options:
         if selection.new == 'Yes':
             drop5.set_trait('options', ['Height >5m & Canopy >30%','Yes', 'No'])
         elif selection.new == 'No':
             drop5.set_trait('options', ['Herbaceous Type','Grassland', 'Pasture','Lawn/Urban Grass','Moss/Lichen'])
 
+# Change other dropdowns based on selection of drop5
 def drop5_clicked(selection, drop5, drop6, drop7, drop8):
-    """ Generate fifth class selector after initial class is chosen """
     if 'Height >5m & Canopy >30%' in drop5.options:
         if selection.new == 'Yes':
             drop6.set_trait('options', ['Forest Type','Evergreen', 'Deciduous','Mixed'])
