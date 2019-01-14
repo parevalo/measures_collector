@@ -18,7 +18,7 @@ def add_basemap(m, basemap):
     bm = ipyleaflet.basemap_to_tiles(basemap)
     m.add_layer(bm)
 
-    return m
+    return
 
 # Add draw control
 def add_draw_control(marker, m, polygon={}, circle={}, circlemarker={}, polyline={}, function=None):
@@ -60,11 +60,9 @@ def add_map_point(data, zoom, m, kml, name):
 
 # Clear all layers on map
 def clear_map(m, streets=None):
-
     m.clear_layers()
-
-    if streets is not None:
-        m.add_layer(streets)
+    add_basemap(m,ipyleaflet.basemaps.Esri.WorldImagery)
+    return
 
 # Add layer from clicked point in sample TS figure
 def click_event(target, m, current_band, df, sample_col, stretch_min, stretch_max, b1, b2, b3):

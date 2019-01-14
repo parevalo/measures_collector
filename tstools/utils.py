@@ -308,6 +308,18 @@ def save_sample(interface, Plot_interface):
         breakList = [str(idSample), str(lat), str(lon), changeAgent, ca_other, confCA, break_year, break_range1, break_range2]
         interface.sheet2.insert_row(breakList, 2)
 
+# Calculate spectral indices
+def get_indices(df):
+
+    df['BRIGHTNESS'] = (df['BLUE'] * 0.2043) + (df['GREEN'] * 0.4158) + (df['RED'] * 0.5524) +\
+                       (df['NIR'] * 0.5741) + (df['SWIR1'] * 0.3124) + (df['SWIR2'] * 0.2303)
+    df['GREENNESS'] = (df['BLUE'] * -0.1603) + (df['GREEN'] * 0.2819) + (df['RED'] * -0.4934) +\
+                      (df['NIR'] * 0.7940) + (df['SWIR1'] * -0.0002) + (df['SWIR2'] * -0.1446)
+    df['WETNESS'] = (df['BLUE'] * 0.0315) + (df['GREEN'] * 0.2021) + (df['RED'] * 0.3102) +\
+                    (df['NIR'] * 0.1594) + (df['SWIR1'] * -0.6806) + (df['SWIR2'] * -0.6109)
+
+    return df
+
 # Get time series for location as a pandas dataframe
 def get_df_full(collection, coords):
 
@@ -327,6 +339,8 @@ def get_df_full(collection, coords):
     data['ord_time'] = data['datetime'].apply(datetime.date.toordinal)
     data = data[['id', 'datetime', 'ord_time', 'BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1',
                 'SWIR2', 'THERMAL', 'pixel_qa', 'doy', 'color']]
+    data = data.dropna()
+    data = get_indices(data)
     return data
 
 # make color list for all 365 days of year
@@ -440,6 +454,6 @@ def handle_draw(action, geo_json, current_band, year_range, doy_range):
     # Get the selected coordinates from the map's drawing control.
     coords = geo_json['geometry']['coordinates']
     click_col = get_full_collection(coords, year_range, doy_range)
-    click_df = get_df_full(click_col, coords).dropna()
+    click_df = get_df_full(click_col, coords)
 
     return click_col, click_df

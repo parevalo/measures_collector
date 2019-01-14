@@ -54,7 +54,7 @@ def make_text(value, placeholder, description, disabled=False, continuous_update
 # Return a textbox floating integer widget
 def make_text_float(value, placeholder, description, disabled=False, continuous_update=True):
 
-    widg = widgets.FloatText(value=value, placeholder=placeholder, disabled=disabled,
+    widg = widgets.FloatText(value=value, placeholder=placeholder, description=description, disabled=disabled,
                          continuous_update=continuous_update)
 
     return widg
@@ -158,14 +158,16 @@ def add_plot_ts(df, plot, band='SWIR1', color_marks=None):
 
     plot.x = df['datetime']
     plot.y = df[band]
-    plot.ylabel = band
-
-    if color_marks:
+    if color_marks is not None:
         plot.colors = list(df['color'].values)
     else:
         plot.colors = ['#43a2ca']
 
 def add_plot_doy(df, plot, band='SWIR1', color_marks=None):
 
-     plot.x = df['doy']
-     plot.y = df[band]
+    plot.x = df['doy']
+    plot.y = df[band]
+    if color_marks is not None:
+        plot.colors = list(df['color'].values)
+    else:
+        plot.colors = ['#43a2ca']
