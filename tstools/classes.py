@@ -6,7 +6,7 @@ import tstools.sheets as sheets
 import tstools.leaflet_tools as lft
 import tstools.ccd as ccd_tools
 import ipyleaflet
-import os, qgrid, datetime, sqlite3
+import os, qgrid, datetime, sqlite3, time
 import pandas as pd
 import tstools.plots as plots
 import ipywidgets as widgets
@@ -613,9 +613,172 @@ class measures(object):
 
         ccd_tools.plot_pyccd(dfPyCCD, results, band_index,(0, 4000), measures.lc6, measures.lc7)
 
+    # Save sample
+    def save_sample():
+        # Connect to the database
+        conn = sqlite3.connect(measures.dbPath)
+        c = conn.cursor()
+
+        # Get everything in right format
+        year1 = measures.years.value[0]
+        year2 = measures.years.value[1]
+
+        waterType = 'N/A'
+        bareType = 'N/A'
+        albedo = 'N/A'
+        use = 'N/A'
+        height = 'N/A'
+        transport = 'N/A'
+        impervious = 'N/A'
+        density = 'N/A'
+        vegType1 = 'N/A'
+        herbaceousType = 'N/A'
+        shrubType = 'N/A'
+        forestPhenology = 'N/A'
+        leafType = 'N/A'
+        location = 'N/A'
+
+        condition = measures.drop9.value
+        coverType = measures.drop0.value
+        changeAgent = measures.change_selector.value
+        changeAgent = [str(i) for i in changeAgent]
+        changeAgent = ', '.join(changeAgent)
+        if changeAgent != 'None':
+            confCA = measures.ca_confidence.value
+            break_year = measures.break_year.value
+            break_range1 = measures.break_years.value[0]
+            break_range2 = measures.break_years.value[1]
+        else:
+            confCA = 'N/A'
+            break_year = 'N/A'
+            break_range1 = 'N/A'
+            break_range2 = 'N/A'
+        ca_other = measures.change_other.value
+        if ca_other == 'Specify other':
+            ca_other = 'N/A'
+
+        direction = measures.direction.value
+        direction = [str(i) for i in direction]
+        direction = ', '.join(direction)
+
+        class1 = 'Unfilled'
+
+        # Ice/Snow
+        if measures.drop1.value == 'Yes':
+            class1 = 'Snow/Ice'
+        else:
+            if measures.drop2.value == 'No': #Non-Veg
+                class1 = measures.drop3.value
+                if class1 == 'Water':
+                    waterType = measures.drop4.value
+                elif class1 == 'Bare':
+                    bareType = measures.drop4.value
+                else:
+                    albedo = measures.drop4.value #HERE
+                    use = measures.drop5.value
+                    height = measures.drop6.value
+                    transport = measures.drop7.value
+                    impervious = measures.drop8.value
+            elif measures.drop2.value == 'Yes': #Veg
+                density = measures.drop3.value
+                vegType1 = measures.veg_selector.value
+                vegType1 = [str(i) for i in vegType1]
+                vegType1 = ', '.join(vegType1)
+                if measures.drop5.value == 'No': #Herbaceous
+                    class1 = 'Herbaceous'
+                    herbaceousType = measures.drop6.value
+                elif measures.drop5.value == 'Yes':
+                    class1 = 'Forest'
+                    forestPhenology = measures.drop6.value
+                    leafType = measures.drop7.value
+                    location = measures.drop8.value
+
+        conf = measures.confidence.value
+        notes_value = measures.notes.value
+        idSample = measures.current_id
+        lat = measures.m.center[0]
+        lon = measures.m.center[1]
+
+        sampleInput = (idSample, lat, lon, year1, year2, direction, coverType, condition,
+                           changeAgent, ca_other, confCA, class1, waterType,
+                           bareType, albedo, use, height, transport, impervious, density,
+                           vegType1, herbaceousType, shrubType, forestPhenology, leafType,
+                           location, conf, notes_value, break_year, break_range1, break_range2)
+
+
+        # Put sample information into database
+        c.execute("""insert into measures
+                  values {i}""".format(i=sampleInput))
+
+        # Save (commit) the changes
+        conn.commit()
+
+        # Close the cursor
+        c.close()
+
+
+
+        # Save to drive
+        sampleInputList = [str(idSample), str(lat), str(lon), str(year1), str(year2), direction, coverType, condition,
+                           changeAgent, ca_other, confCA, class1, waterType,
+                           bareType, albedo, use, height, transport, impervious, density,
+                           vegType1, herbaceousType, shrubType, forestPhenology, leafType, location, conf, notes_value]
+
+        sampleInputListFull = sampleInputList
+
+        # Save break information to second sheet
+        if condition == 'Break':
+            breakList = [str(idSample), str(lat), str(lon), changeAgent, ca_other, confCA, break_year, break_range1, break_range2]
+            measures.sheet2.insert_row(breakList, 2)
+            count = len(measures.sheet2.col_values(1))
+            time.sleep(3)
+            count_new = len(measures.sheet2.col_values(1))
+        else:
+            count = len(measures.sheet.col_values(1))
+            measures.sheet.insert_row(sampleInputListFull, 2)
+            time.sleep(3)
+            count_new = len(measures.sheet.col_values(1))
+
+        if count_new > count:
+            # Change save validity state
+            measures.valid.value = True
+            measures.valid.description='Saved!'
+            measures.reset_everything()
+        else:
+            time.sleep(10)
+            if condition == 'Break':
+                count_new = len(measures.sheet2.col_values(1))
+            else:
+                count_new = len(measures.sheet.col_values(1))
+            if count_new > count:
+                # Change save validity state
+                measures.valid.value = True
+                measures.valid.description='Saved!'
+                measures.reset_everything()
+
+    # Reset all widgets
+    def reset_everything():
+
+        measures.drop1.set_trait('value', 'Persistant Ice?')
+        measures.drop2.set_trait('options', ['Decision 3'])
+        measures.drop3.set_trait('options', ['Decision 4'])
+        measures.drop5.set_trait('options', ['Decision 5'])
+        measures.drop6.set_trait('options', ['Decision 6'])
+        measures.drop7.set_trait('options', ['Decision 7'])
+        measures.drop8.set_trait('options', ['Decision 8'])
+        measures.veg_selector.disabled = True
+        measures.years.set_trait('value',[1990, 1991])
+        measures.confidence.set_trait('value',0)
+        measures.ca_confidence.set_trait('value',0)
+
+    # Interaction function for saving sample
+    def do_save_sample(a):
+        measures.save_sample()
+        measures.change_table(0)
 
     # Widget interactions
 
+    save_button.on_click(do_save_sample)
     validate.on_click(check_val_status)
     drop1.observe(drop1_clicked, 'value')
     drop2.observe(drop2_clicked, 'value')
@@ -811,6 +974,7 @@ class pyccd_explorer(object):
         fc_df = utils.fc2dfgeo(sample_path)
         measures.fc_df, first_index = utils.check_id(fc_df)
         measures.current_id = first_index - 1
+        measures.reset_everything()
 
     def change_yaxis(value):
         measures.lc2_y.min = measures.ylim.value[0]
