@@ -32,7 +32,9 @@ class measures(object):
         measures.b2 = 'NIR'
         measures.b3 = 'RED'
 
-    # Starting variables
+
+    ####### Starting Variables #######
+
     pyccd_flag = False
     pyccd_flag2 = False
     current_band = ''
@@ -51,7 +53,9 @@ class measures(object):
     step = 1 #in years
     current_id = 0
 
-    # Set up database
+
+    ####### Database #######
+
     dbPath = os.getcwd() + '/measures_database'
     command = '''CREATE TABLE measures
                   (id text, lat text, lon text, year1 text, year2 text, direction text, coverType text,
@@ -63,7 +67,8 @@ class measures(object):
                   byear text, brange1 text, brange2 text)'''
     conn = sql.make_db(dbPath, command)
 
-    # Widgets
+
+    ###### Widgets ######
 
     # Sliders
     years = plots.make_range_slider([1990, 1991], 1990, 2018, 1, 'Years:')
@@ -178,8 +183,7 @@ class measures(object):
     table_widget = qgrid.show_grid(table, show_toolbar=False)
 
 
-
-    # Plots
+    ###### Plots ######
 
     # Scales
     # Dates
@@ -241,7 +245,7 @@ class measures(object):
                                'Clicked TS')
 
 
-    # Functions
+    ###### Functions ######
 
     # Delete data highlighted in rows
     def delete_data_rows(a):
@@ -623,8 +627,7 @@ class measures(object):
         measures.sample_df = utils.get_df_full(measures.sample_col, coords).dropna()
         measures.error_label.value = 'Point Loaded!'
 
-
-    # TODO: how is this different from handle_draw?
+    # Add time series data to plots
     def plot_ts(plot, plottype):
         df = measures.sample_df
 
@@ -683,6 +686,7 @@ class measures(object):
             ccd_tools.plot_pyccd(dfPyCCD, results, band_index,(0, 4000), measures.lc6, measures.lc7)
             measures.lc7.display_legend=True
 
+    # Clear pyccd results
     def clear_pyccd(b):
         measures.lc4.x = []
         measures.lc5.y = []
@@ -879,8 +883,8 @@ class measures(object):
         measures.save_sample()
         measures.change_table(0)
 
+    # Activate break widgets
     def do_activate_break(b):
-        print(b.new)
         if b.new == True:
             measures.break_year.disabled = False
             measures.break_years.disabled = False
@@ -899,12 +903,9 @@ class measures(object):
             measures.b_change_other.disabled = True
             measures.b_ca_confidence.disabled = True
             measures.notes_break.disabled = True
-#        print(measures.break_check.value)
 
-        #if break_check.value == True:
-        #    meas
 
-    # Widget interactions
+    ####### Widget Interactions #######
 
     break_check.observe(do_activate_break, 'value')
     delete_rows.on_click(delete_data_rows)
