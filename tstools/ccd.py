@@ -66,9 +66,8 @@ def plot_pyccd(dfPyCCD, results, band, yl, scatter_ts, scatter_ts_breaks):
     scatter_ts_breaks.y = break_y
 
 # Run pyccd for a pixel
-def run_pyccd(pyccd_flag, display_legend, dfPyCCD, band_index):
+def run_pyccd(display_legend, dfPyCCD, band_index):
 
-    pyccd_flag = True
     display_legend=True
 
     dfPyCCD['pixel_qa'][dfPyCCD['pixel_qa'] > 4] = 0
