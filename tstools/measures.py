@@ -443,6 +443,11 @@ class measures(object):
         measures.change_table(0)
         measures.valid.value = False
         measures.description='Not Saved'
+        measures.notes.value='Enter any useful or interesting information about the land cover of this sample'
+        measures.notes_seg_trend.value = 'Enter any useful or interesting information about the Time Trend of this sample'
+        measures.notes_break.value = 'Enter any useful or interesting information about the Break in the time series'
+    
+        
 
 
     # Go to previous sample
@@ -464,6 +469,9 @@ class measures(object):
         measures.change_table(0)
         measures.valid.value = False
         measures.description='Not Saved'
+        measures.notes.value='Enter any useful or interesting information about the land cover of this sample'
+        measures.notes_seg_trend.value = 'Enter any useful or interesting information about the Time Trend of this sample'
+        measures.notes_break.value = 'Enter any useful or interesting information about the Break in the time series'
 
 
     # Go to a specific sample
@@ -484,6 +492,9 @@ class measures(object):
         #measures.plot_ts()
         measures.plot_ts(measures.lc2, 'ts')
         measures.plot_ts(measures.lc8, 'doy')
+        measures.notes.value='Enter any useful or interesting information about the land cover of this sample'
+        measures.notes_seg_trend.value = 'Enter any useful or interesting information about the Time Trend of this sample'
+        measures.notes_break.value = 'Enter any useful or interesting information about the Break in the time series'
 
     # Return to sample location
     def return_to_sample(b):
