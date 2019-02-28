@@ -427,7 +427,7 @@ class measures(object):
 
     # Advance to next sample
     def advance(b):
-
+        # TODO: Create a function that resets these values to avoid code redundancy
         measures.lc4.x = []
         measures.lc4.y = []
         measures.lc5.x = []
@@ -446,8 +446,7 @@ class measures(object):
         measures.notes.value='Enter any useful or interesting information about the land cover of this sample'
         measures.notes_seg_trend.value = 'Enter any useful or interesting information about the Time Trend of this sample'
         measures.notes_break.value = 'Enter any useful or interesting information about the Break in the time series'
-    
-        
+        measures.break_check.value = False
 
 
     # Go to previous sample
@@ -472,6 +471,7 @@ class measures(object):
         measures.notes.value='Enter any useful or interesting information about the land cover of this sample'
         measures.notes_seg_trend.value = 'Enter any useful or interesting information about the Time Trend of this sample'
         measures.notes_break.value = 'Enter any useful or interesting information about the Break in the time series'
+        measures.break_check.value = False
 
 
     # Go to a specific sample
@@ -495,6 +495,7 @@ class measures(object):
         measures.notes.value='Enter any useful or interesting information about the land cover of this sample'
         measures.notes_seg_trend.value = 'Enter any useful or interesting information about the Time Trend of this sample'
         measures.notes_break.value = 'Enter any useful or interesting information about the Break in the time series'
+        measures.break_check.value = False
 
     # Return to sample location
     def return_to_sample(b):
