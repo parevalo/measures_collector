@@ -108,7 +108,7 @@ class measures(object):
     break_check = plots.make_checkbox(False, 'Land Cover Change in TS?', False)
 
     # Select multiple
-    veg_selector = plots.make_selector(['Veg Type'],['Veg Type', 'Cropland','Plantation','Wetland',
+    veg_selector = plots.make_selector(['Select a modifier'],['Select a modifier', 'Cropland','Plantation','Wetland',
                                        'Riparian/Flood','Mangrove'],'Veg Type:',disabled=True)
     change_selector = plots.make_selector(['None'],['None','Deforestation/Logging', 'Fire', 'Insect damage',
                                           'Urban Dev.', 'Flooding','Decline/Degradation','Regrowth',
