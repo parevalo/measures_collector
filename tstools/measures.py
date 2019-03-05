@@ -75,7 +75,7 @@ class measures(object):
     break_years = plots.make_range_slider([1990, 1991], 1990, 2018, 1, 'Years:', disabled=True)
     break_year = plots.make_slider(1990, 1991, 2018, 1, 'Years:', disabled=True)
     confidence = plots.make_slider(0, 0, 3, 1, 'Confidence:')
-    ca_confidence = plots.make_slider(0, 0, 3, 1, '', disabled=False)
+    ca_confidence = plots.make_slider(0, 0, 3, 1, '', disabled=True)
     b_ca_confidence = plots.make_slider(0, 0, 3, 1, '', disabled=True)
 
     ylim = plots.make_range_slider([0, 4000], -10000, 10000, 500, 'YLim:')
@@ -93,7 +93,7 @@ class measures(object):
     drop6 = plots.make_drop('Decision 7', ['Decision 7'], 'Decision 7')
     drop7 = plots.make_drop('Decision 8', ['Decision 8'], 'Decision 8')
     drop8 = plots.make_drop('Decision 9', ['Decision 9'], 'Decision 9')
-    drop9 = plots.make_drop('Stable', ['Stable','Transitional'], '')
+    drop9 = plots.make_drop('Select type', ['Select type', 'Stable','Transitional'], '')
     drop0 = plots.make_drop('Dominant or Secondary?', ['Dominant or Secondary?','Dominant','Secondary'],
                             'Decision 1')
 
@@ -108,30 +108,30 @@ class measures(object):
     break_check = plots.make_checkbox(False, 'Land Cover Change in TS?', False)
 
     # Select multiple
-    veg_selector = plots.make_selector(['Select a modifier'],['Select a modifier', 'Cropland','Plantation','Wetland',
+    veg_selector = plots.make_selector(['Select a modifier'],['Select a modifier', 'None', 'Cropland','Plantation','Wetland',
                                        'Riparian/Flood','Mangrove'],'Veg Type:',disabled=True)
     change_selector = plots.make_selector(['None'],['None','Deforestation/Logging', 'Fire', 'Insect damage',
                                           'Urban Dev.', 'Flooding','Decline/Degradation','Regrowth',
-                                          'Riparian/Water shift','Other (Specify)'], '')
+                                          'Riparian/Water shift', 'Unknown', 'Other (Specify)'], '', disabled=True)
     b_change_selector = plots.make_selector(['None'],['None','Deforestation/Logging', 'Fire', 'Insect damage',
                                           'Urban Dev.', 'Flooding','Decline/Degradation','Regrowth',
                                           'Riparian/Water shift','Other (Specify)'], '',disabled=True)
     direction = plots.make_selector(['NA'],['NA','Unknown','Veg Increase','Veg Decrease','Water Increase',
                                     'Water Decrease','Bare Increase','Bare Decrease','Urban Increase',
-                                    'Urban Decrease','Albedo Increase','Albedo Decrease'],'')
+                                    'Urban Decrease','Albedo Increase','Albedo Decrease'],'', disabled=True)
     b_direction = plots.make_selector(['NA'],['NA','Unknown','Veg Increase','Veg Decrease','Water Increase',
                                     'Water Decrease','Bare Increase','Bare Decrease','Urban Increase',
                                     'Urban Decrease','Albedo Increase','Albedo Decrease'],'', disabled=True)
 
     # Text boxes
-    change_other = plots.make_text('Specify other','Specify other','Other:')
+    change_other = plots.make_text('Specify other','Specify other','Other:', disabled=True)
     b_change_other = plots.make_text('Specify other','Specify other','Other:', disabled=True)
     notes = plots.make_text_large('Enter any useful or interesting information about the land cover of this sample',
                                   '',
                                   'Notes', layout=widgets.Layout()) #,layout=widgets.Layout(width='70%'))
     notes_seg_trend = plots.make_text_large('Enter any useful or interesting information about the Time Trend of this sample',
                                             '',
-                                            'Notes', layout=widgets.Layout()) # TODO: save this
+                                            'Notes', layout=widgets.Layout())
     notes_break = plots.make_text_large('Enter any useful or interesting information about the Break in the time series',
                                             '',
                                             'Notes', layout=widgets.Layout(), disabled=True) # TODO: save this
@@ -388,7 +388,19 @@ class measures(object):
         else:
             measures.break_years.disabled = True
             measures.break_year.disabled = True
-
+    
+    # If segment is stable, disable LCC direction and change agent
+    def toggle_transitional_opts(selection):
+        if selection.new == "Transitional":
+            measures.direction.disabled = False
+            measures.change_selector.disabled = False
+            measures.change_other.disabled = False
+            measures.ca_confidence.disabled = False
+        elif selection.new == "Stable":
+            measures.direction.disabled = True
+            measures.change_selector.disabled = True
+            measures.change_other.disabled = True
+            measures.ca_confidence.disabled = True
 
     # Change yaxis for the sample time series
     def change_yaxis(value):
@@ -737,39 +749,42 @@ class measures(object):
         b_confCA = 'N/A'
         b_direction = 'N/A'
         location = 'N/A'
-
-        condition = measures.break_check.value
-        if condition == True:
-            condition = 'Break'
-        else:
-            condition = 'Stable'
+       
         coverType = measures.drop0.value
+        
+        # Segment type
+        seg_type = measures.drop9.value
+        direction = measures.direction.value
+        direction = [str(i) for i in direction]
+        direction = ', '.join(direction)
+
         changeAgent = measures.change_selector.value
         changeAgent = [str(i) for i in changeAgent]
         changeAgent = ', '.join(changeAgent)
         confCA = measures.ca_confidence.value
-        b_confCA = measures.b_ca_confidence.value
+        ca_other = measures.change_other.value
+        
+        if ca_other == 'Specify other':
+            ca_other = 'N/A'
+        seg_notes = measures.notes_seg_trend.value
 
+        # Break
+        condition = measures.break_check.value
+        if condition:
+            condition = 'Break'
+        else:
+            condition = 'No Break'
         b_changeAgent = measures.b_change_selector.value
         b_changeAgent = [str(i) for i in b_changeAgent]
         b_changeAgent = ', '.join(b_changeAgent)
-
         break_year = measures.break_year.value
         break_range1 = measures.break_years.value[0]
         break_range2 = measures.break_years.value[1]
-        ca_other = measures.change_other.value
+        b_confCA = measures.b_ca_confidence.value
         b_ca_other = measures.b_change_other.value
 
-        if ca_other == 'Specify other':
-            ca_other = 'N/A'
-
-        b_ca_other = measures.b_change_other.value
         if b_ca_other == 'Specify other':
             b_ca_other = 'N/A'
-
-        direction = measures.direction.value
-        direction = [str(i) for i in direction]
-        direction = ', '.join(direction)
 
         b_direction = measures.b_direction.value
         b_direction = [str(i) for i in b_direction]
@@ -810,16 +825,17 @@ class measures(object):
         conf = measures.confidence.value
         notes_value = measures.notes.value
         b_notes_value = measures.notes_break.value
-        seg_notes = measures.notes_seg_trend.value
         idSample = measures.current_id
         lat = measures.m.center[0]
         lon = measures.m.center[1]
-
-        sampleInput = (idSample, lat, lon, year1, year2, direction, coverType, condition,
-                           changeAgent, ca_other, confCA, class1, waterType,
-                           bareType, albedo, use, height, transport, impervious, density,
-                           vegType1, herbaceousType, shrubType, forestPhenology, leafType,
-                           location, conf, notes_value, break_year, break_range1, break_range2)
+        
+        sampleInput = (idSample, lat, lon, year1, year2, coverType, condition,
+                       class1, waterType, bareType, albedo, use, height, 
+                       transport, impervious, density, vegType1, 
+                       herbaceousType, shrubType, forestPhenology, leafType,
+                       location, conf, notes_value, seg_type, direction, 
+                       changeAgent, confCA, ca_other, seg_notes,
+                       break_year, break_range1, break_range2)
 
 
         # Put sample information into database
@@ -834,16 +850,22 @@ class measures(object):
 
 
         # Save to drive
-        sampleInputList = [str(idSample), str(lat), str(lon), str(year1), str(year2), direction, coverType, condition,
-                           changeAgent, ca_other, confCA, class1, waterType,
-                           bareType, albedo, use, height, transport, impervious, density,
-                           vegType1, herbaceousType, shrubType, forestPhenology, leafType, location, conf, notes_value, seg_notes]
+        sampleInputList = [str(idSample), str(lat), str(lon), str(year1), 
+                           str(year2), coverType, condition,
+                           class1, waterType, bareType, albedo, 
+                           use, height, transport, impervious, density,
+                           vegType1, herbaceousType, shrubType, 
+                           forestPhenology, leafType, location, str(conf), 
+                           notes_value, seg_type, direction, changeAgent, 
+                           str(confCA), ca_other, seg_notes]
 
         sampleInputListFull = sampleInputList
 
-        # Save break information to second sheet
+        # Save break information to second sheet, FIX TO REFLECT SEGMENT CHANGE TAB!
         if condition == 'Break':
-            breakList = [str(idSample), str(lat), str(lon), b_changeAgent, b_ca_other, b_confCA, break_year, break_range1, break_range2, b_direction, b_notes_value]
+            breakList = [str(idSample), str(lat), str(lon), b_changeAgent, 
+            b_ca_other, b_confCA, break_year, break_range1, break_range2, 
+            b_direction, b_notes_value]
             measures.sheet2.insert_row(breakList, 2)
             count = len(measures.sheet2.col_values(1))
             time.sleep(3)
@@ -891,7 +913,7 @@ class measures(object):
         measures.ca_confidence.set_trait('value',0)
 
     # Interaction function for saving sample
-    def do_save_sample(a):
+    def do_save_sample(b):
         measures.save_sample()
         measures.change_table(0)
 
@@ -930,11 +952,13 @@ class measures(object):
     drop3.observe(drop3_clicked, 'value')
     drop4.observe(drop4_clicked, 'value')
     drop5.observe(drop5_clicked, 'value')
+    drop9.observe(toggle_transitional_opts, 'value')
 
     load_button.on_click(load_everything)
 
     dc = ipyleaflet.DrawControl(marker={'shapeOptions': {'color': '#ff0000'}},
-                                 polygon={}, circle={}, circlemarker={}, polyline={})
+                                polygon={}, circle={}, circlemarker={}, 
+                                polyline={})
 
     zoom = 5
     layout = widgets.Layout(width='50%')
