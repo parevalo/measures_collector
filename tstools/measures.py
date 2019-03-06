@@ -72,8 +72,8 @@ class measures(object):
 
     # Sliders
     years = plots.make_range_slider([1990, 1991], 1990, 2018, 1, 'Years:')
-    break_years = plots.make_range_slider([1990, 1991], 1990, 2018, 1, 'Years:', disabled=True)
-    break_year = plots.make_slider(1990, 1991, 2018, 1, 'Years:', disabled=True)
+    break_years = plots.make_range_slider([1990, 1991], 1990, 2018, 1, 'Confidence:', disabled=True)
+    break_year = plots.make_slider(1990, 1991, 2018, 1, 'Year:', disabled=True)
     confidence = plots.make_slider(0, 0, 3, 1, 'Confidence:')
     ca_confidence = plots.make_slider(0, 0, 3, 1, '', disabled=True)
     b_ca_confidence = plots.make_slider(0, 0, 3, 1, '', disabled=True)
@@ -330,9 +330,14 @@ class measures(object):
 
         if 'Trees?' in measures.drop4.options:
             if selection.new == 'Yes':
-                measures.drop5.set_trait('options', ['Height >5m & Canopy >30%','Yes', 'No'])
+                measures.drop5.set_trait('options', ['Height >5m & Canopy >30%',
+                                                     'Yes', 'No'])
             elif selection.new == 'No':
-                measures.drop5.set_trait('options', ['Herbaceous Type','Grassland', 'Pasture','Lawn/Urban Grass','Moss/Lichen'])
+                measures.drop5.set_trait('options', ['Herbaceous Type', 
+                                                     'Grassland', 'Pasture',
+                                                     'Row crops',
+                                                     'Lawn/Urban Grass',
+                                                     'Moss/Lichen'])
 
 
     # Change dropdowns based on drop5 selection
@@ -340,12 +345,16 @@ class measures(object):
 
         if 'Height >5m & Canopy >30%' in measures.drop5.options:
             if selection.new == 'Yes':
-                measures.drop6.set_trait('options', ['Forest Type','Evergreen', 'Deciduous','Mixed'])
-                measures.drop7.set_trait('options', ['Leaf Type','Broad', 'Needle','Unsure'])
-                measures.drop8.set_trait('options', ['Location','Interior', 'Edge'])
-
+                measures.drop6.set_trait('options', ['Forest Type', 'Evergreen',
+                                                     'Deciduous', 'Mixed'])
+                measures.drop7.set_trait('options', ['Leaf Type', 'Broad', 
+                                                     'Needle', 'Mixed', 
+                                                     'Unsure'])
+                measures.drop8.set_trait('options', ['Location', 'Interior', 
+                                                     'Edge'])
             elif selection.new == 'No':
-                measures.drop6.set_trait('options', ['Shrub Type','Evergreen', 'Deciduous','Mixed'])
+                measures.drop6.set_trait('options', ['Shrub Type', 'Evergreen', 
+                                                     'Deciduous', 'Mixed'])
 
 
     # Check validity of current sample
@@ -722,8 +731,8 @@ class measures(object):
     # Save sample
     def save_sample():
         # Connect to the database
-        conn = sqlite3.connect(measures.dbPath)
-        c = conn.cursor()
+        #conn = sqlite3.connect(measures.dbPath)
+        #c = conn.cursor()
 
         # Get everything in right format
         year1 = measures.years.value[0]
@@ -813,10 +822,10 @@ class measures(object):
                 vegType1 = measures.veg_selector.value
                 vegType1 = [str(i) for i in vegType1]
                 vegType1 = ', '.join(vegType1)
-                if measures.drop5.value == 'No': #Herbaceous
+                if measures.drop4.value == 'No': #Herbaceous
                     class1 = 'Herbaceous'
-                    herbaceousType = measures.drop6.value
-                elif measures.drop5.value == 'Yes':
+                    herbaceousType = measures.drop5.value
+                elif measures.drop4.value == 'Yes':
                     class1 = 'Forest'
                     forestPhenology = measures.drop6.value
                     leafType = measures.drop7.value
@@ -836,17 +845,17 @@ class measures(object):
                        location, conf, notes_value, seg_type, direction, 
                        changeAgent, confCA, ca_other, seg_notes,
                        break_year, break_range1, break_range2)
-
+        print(sampleInput)
 
         # Put sample information into database
-        c.execute("""insert into measures
-                  values {i}""".format(i=sampleInput))
-
+        #c.execute("""insert into measures
+        #          values {i}""".format(i=sampleInput))
+        #
         # Save (commit) the changes
-        conn.commit()
+        #conn.commit()
 
         # Close the cursor
-        c.close()
+        #c.close()
 
 
         # Save to drive
@@ -861,11 +870,11 @@ class measures(object):
 
         sampleInputListFull = sampleInputList
 
-        # Save break information to second sheet, FIX TO REFLECT SEGMENT CHANGE TAB!
+        # Save break information to second sheet
         if condition == 'Break':
             breakList = [str(idSample), str(lat), str(lon), b_changeAgent, 
-            b_ca_other, b_confCA, break_year, break_range1, break_range2, 
-            b_direction, b_notes_value]
+                         b_ca_other, b_confCA, break_year, break_range1, 
+                         break_range2, b_direction, b_notes_value]
             measures.sheet2.insert_row(breakList, 2)
             count = len(measures.sheet2.col_values(1))
             time.sleep(3)
@@ -915,7 +924,7 @@ class measures(object):
     # Interaction function for saving sample
     def do_save_sample(b):
         measures.save_sample()
-        measures.change_table(0)
+       # measures.change_table(0)
 
     # Activate break widgets
     def do_activate_break(b):
