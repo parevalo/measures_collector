@@ -478,13 +478,7 @@ class measures(object):
         measures.plot_ts(measures.lc2, 'ts')
         measures.plot_ts(measures.lc8, 'doy')
         measures.change_table(0)
-        measures.valid.value = False
-        measures.description='Not Saved'
-        measures.notes.value='Enter any useful or interesting information about the land cover of this sample'
-        measures.notes_seg_trend.value = 'Enter any useful or interesting information about the Time Trend of this sample'
-        measures.notes_break.value = 'Enter any useful or interesting information about the Break in the time series'
-        measures.break_check.value = False
-
+        measures.reset_everything()
 
     # Go to previous sample
     def decrease(b):
@@ -503,13 +497,7 @@ class measures(object):
         measures.plot_ts(measures.lc2, 'ts')
         measures.plot_ts(measures.lc8, 'doy')
         measures.change_table(0)
-        measures.valid.value = False
-        measures.description='Not Saved'
-        measures.notes.value='Enter any useful or interesting information about the land cover of this sample'
-        measures.notes_seg_trend.value = 'Enter any useful or interesting information about the Time Trend of this sample'
-        measures.notes_break.value = 'Enter any useful or interesting information about the Break in the time series'
-        measures.break_check.value = False
-
+        measures.reset_everything()
 
     # Go to a specific sample
     def go_to_sample(b):
@@ -529,10 +517,7 @@ class measures(object):
         #measures.plot_ts()
         measures.plot_ts(measures.lc2, 'ts')
         measures.plot_ts(measures.lc8, 'doy')
-        measures.notes.value='Enter any useful or interesting information about the land cover of this sample'
-        measures.notes_seg_trend.value = 'Enter any useful or interesting information about the Time Trend of this sample'
-        measures.notes_break.value = 'Enter any useful or interesting information about the Break in the time series'
-        measures.break_check.value = False
+        measures.reset_everything()
 
     # Return to sample location
     def return_to_sample(b):
@@ -861,7 +846,7 @@ class measures(object):
         b_notes_value = measures.notes_break.value
 
         # Get coordinates depending on source
-        if measures.click_train:
+        if measures.click_train.value:
             idSample = 0
             lat = measures.click_geojson['geometry']['coordinates'][1]
             lon = measures.click_geojson['geometry']['coordinates'][0]
@@ -944,8 +929,9 @@ class measures(object):
 
     # Reset all widgets
     def reset_everything():
-        
+        # Land cover
         measures.click_train.set_trait('value', False)
+        measures.drop0.set_trait('value', 'Dominant or Secondary?')
         measures.drop1.set_trait('value', 'Persistant Ice?')
         measures.drop2.set_trait('options', ['Decision 3'])
         measures.drop3.set_trait('options', ['Decision 4'])
@@ -953,10 +939,35 @@ class measures(object):
         measures.drop6.set_trait('options', ['Decision 6'])
         measures.drop7.set_trait('options', ['Decision 7'])
         measures.drop8.set_trait('options', ['Decision 8'])
+        measures.veg_selector.set_trait('value', ('Select a modifier',))
         measures.veg_selector.disabled = True
-        measures.years.set_trait('value',[1990, 1991])
-        measures.confidence.set_trait('value',0)
-        measures.ca_confidence.set_trait('value',0)
+        measures.years.set_trait('value', [1990, 1991])
+        measures.confidence.set_trait('value', 0)
+        measures.valid.value = False
+        measures.description = 'Not Saved'
+        
+        # Segment attrs
+        measures.drop9.set_trait('value', 'Select type')
+        measures.direction.set_trait('value', ('NA',))
+        measures.change_selector.set_trait('value', ('None',))
+        measures.notes.value = 'Enter any useful or interesting information \
+                                about the land cover of this sample'
+        measures.ca_confidence.set_trait('value', 0)
+        measures.notes_seg_trend.value = 'Enter any useful or interesting \
+                                         information about the Time Trend of \
+                                         this sample'
+        
+        # Break
+        measures.break_check.value = False
+        measures.break_year.set_trait('value', 1991)
+        measures.break_years.set_trait('value', [1990, 1991])
+        measures.b_direction.set_trait('value', ('NA',))
+        measures.b_change_selector.set_trait('value', ('None',))
+        measures.b_change_other.set_trait('value', 'Specify other')
+        measures.b_ca_confidence.set_trait('value', 0)
+        measures.notes_break.value = 'Enter any useful or interesting \
+                                     information about the Break in the \
+                                     time series'
 
     # Interaction function for saving sample
     def do_save_sample(b):
@@ -991,7 +1002,8 @@ class measures(object):
             measures.box_geojson = ipyleaflet.GeoJSON(data=measures.click_trainbox.getInfo(),
                                              style={'color': 'black'},
                                              name='TS train box')
-            measures.m.add_layer(measures.box_geojson) 
+            measures.m.add_layer(measures.box_geojson)
+            measures.reset_everything()
         else:
             measures.m.remove_layer(measures.box_geojson)
 
