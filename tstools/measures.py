@@ -48,6 +48,7 @@ class measures(object):
     click_trainbox = ''
     sample_col = ''
     sample_df = pd.DataFrame()
+    samplept_geojson = ''
     PyCCDdf = pd.DataFrame()
     table = pd.DataFrame()
     band_list =['BLUE', 'GREEN', 'RED','NIR','SWIR1','SWIR2', 'BRIGHTNESS','GREENNESS','WETNESS']
@@ -392,6 +393,7 @@ class measures(object):
 
         measures.sheet = sheets.load_sheet(measures.spreadName.value, 0,  measures.spreadsheet.value)
         measures.sheet2 = sheets.load_sheet(measures.spreadName.value, 1,  measures.spreadsheet.value)
+        measures.sheet3 = sheets.load_sheet(measures.spreadName.value, 2,  measures.spreadsheet.value)
 
         # Load the sample as a feature collection
         sample_path = measures.sampleWidget.value
@@ -640,6 +642,7 @@ class measures(object):
         measures.click_col = _col
         
         # Disable ts collection checkbox but calculate box in the background
+        
         measures.click_train.value = False
         measures.click_trainbox = utils.calculate_clicked_bbox(geo_json)
 
@@ -662,11 +665,11 @@ class measures(object):
         zoom = int(measures.zoom_box.value)
         kml = measures.kml_link
         name = 'Sample point'
-        data = measures.fc_df['geometry'][measures.current_id]
-        coord1 = data['coordinates'][0]
-        coord2 = data['coordinates'][1]
+        measures.samplept_geojson = measures.fc_df['geometry'][measures.current_id]
+        coord1 = measures.samplept_geojson['coordinates'][0]
+        coord2 = measures.samplept_geojson['coordinates'][1]
         measures.coord_message.value = "Lat, Lon: {}, {}".format(coord2, coord1)
-        lft.add_map_point(data, zoom, measures.m, kml, name)
+        lft.add_map_point(measures.samplept_geojson, zoom, measures.m, kml, name)
 
 
     # Get time series data for location.
@@ -856,9 +859,17 @@ class measures(object):
         conf = measures.confidence.value
         notes_value = measures.notes.value
         b_notes_value = measures.notes_break.value
-        idSample = measures.current_id
-        lat = measures.m.center[0]
-        lon = measures.m.center[1]
+
+        # Get coordinates depending on source
+        if measures.click_train:
+            idSample = 0
+            lat = measures.click_geojson['geometry']['coordinates'][1]
+            lon = measures.click_geojson['geometry']['coordinates'][0]
+        else:
+            idSample = measures.current_id
+            lat = measures.samplept_geojson['coordinates'][1]
+            lon = measures.samplept_geojson['coordinates'][0]
+
 
         sampleInput = (idSample, lat, lon, year1, year2, coverType, condition,
                        class1, waterType, bareType, albedo, use, height,
@@ -900,6 +911,10 @@ class measures(object):
             measures.sheet2.insert_row(breakList, 2)
             time.sleep(3)
             count_new = len(measures.sheet2.col_values(1))
+        elif measures.click_train:
+            count = len(measures.sheet3.col_values(1))
+            measures.sheet3.insert_row(sampleInputListFull, 2)
+            count_new = len(measures.sheet3.col_values(1))
         else:
             count = len(measures.sheet.col_values(1))
             measures.sheet.insert_row(sampleInputListFull, 2)
@@ -946,7 +961,8 @@ class measures(object):
     # Interaction function for saving sample
     def do_save_sample(b):
         measures.save_sample()
-       # measures.change_table(0)
+       #measures.change_table(0)
+        measures.reset_everything()
 
     # Activate break widgets
     def do_activate_break(b):
