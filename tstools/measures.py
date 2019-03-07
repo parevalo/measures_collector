@@ -43,6 +43,9 @@ class measures(object):
     click_col = ''
     point_color = ['#43a2ca']
     click_df = pd.DataFrame()
+    click_geojson = ''
+    box_geojson = ''
+    click_trainbox = ''
     sample_col = ''
     sample_df = pd.DataFrame()
     PyCCDdf = pd.DataFrame()
@@ -116,6 +119,7 @@ class measures(object):
     # Checkbox
     color_check = plots.make_checkbox(False, 'Color DOY', False)
     break_check = plots.make_checkbox(False, 'Land Cover Change in TS?', False)
+    click_train = plots.make_checkbox(False, 'Collect TS training', False)
 
     # Select multiple
     veg_selector = plots.make_selector(['Select a modifier'],['Select a modifier', 'None', 'Cropland','Plantation','Wetland',
@@ -180,7 +184,7 @@ class measures(object):
     valid_load = plots.make_valid(False, 'Not Loaded','')
 
     # HTML
-    pt_message = plots.make_html('Current ID: ')
+    pt_message = plots.make_html('<b>Current ID:</b>')
     time_label = plots.make_html('')
     coord_message = plots.make_html('Lat, Lon: ')
     selected_label = plots.make_html('ID of selected point')
@@ -624,13 +628,21 @@ class measures(object):
 
     # Plot ts for point
     def do_draw(self, action, geo_json):
-
+        
         current_band = measures.band_list[measures.band_index2]
         year_range = measures.year_range
         doy_range = measures.doy_range
-        _col, _df = utils.handle_draw(action, geo_json, current_band, year_range, doy_range)
+        _col, _df = utils.handle_draw(action, geo_json, current_band, 
+                                      year_range, doy_range)
+        
+        measures.click_geojson = geo_json
         measures.click_df = _df
         measures.click_col = _col
+        
+        # Disable ts collection checkbox but calculate box in the background
+        measures.click_train.value = False
+        measures.click_trainbox = utils.calculate_clicked_bbox(geo_json)
+
         measures.lc6.x = []
         measures.lc6.y = []
         measures.lc7.x = []
@@ -917,7 +929,8 @@ class measures(object):
 
     # Reset all widgets
     def reset_everything():
-
+        
+        measures.click_train.set_trait('value', False)
         measures.drop1.set_trait('value', 'Persistant Ice?')
         measures.drop2.set_trait('options', ['Decision 3'])
         measures.drop3.set_trait('options', ['Decision 4'])
@@ -937,7 +950,7 @@ class measures(object):
 
     # Activate break widgets
     def do_activate_break(b):
-        if b.new == True:
+        if b.new:
             measures.break_year.disabled = False
             measures.break_years.disabled = False
             measures.b_direction.disabled = False
@@ -955,10 +968,20 @@ class measures(object):
             measures.b_change_other.disabled = True
             measures.b_ca_confidence.disabled = True
             measures.notes_break.disabled = True
-
+    
+    # Enable collection of TS box as training data
+    def enable_ts_collection(b):
+        if b.new:
+            measures.box_geojson = ipyleaflet.GeoJSON(data=measures.click_trainbox.getInfo(),
+                                             style={'color': 'black'},
+                                             name='TS train box')
+            measures.m.add_layer(measures.box_geojson) 
+        else:
+            measures.m.remove_layer(measures.box_geojson)
 
     ####### Widget Interactions #######
 
+    click_train.observe(enable_ts_collection, 'value')
     break_check.observe(do_activate_break, 'value')
     delete_rows.on_click(delete_data_rows)
     return_button.on_click(return_to_sample)

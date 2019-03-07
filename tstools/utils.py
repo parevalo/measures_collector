@@ -457,3 +457,13 @@ def handle_draw(action, geo_json, current_band, year_range, doy_range):
     click_df = get_df_full(click_col, coords)
 
     return click_col, click_df
+
+
+# Calculate 90m bbox around clicked point for opportunistic
+# training data collection
+def calculate_clicked_bbox(geojson):
+    # TODO: Calculate target coordinate system
+    target_proj = ee.Projection('EPSG:32618')
+    click_feat = ee.Feature(geojson)
+    bbox = click_feat.buffer(45, 0, target_proj).bounds(0.1)
+    return bbox
