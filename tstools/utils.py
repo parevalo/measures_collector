@@ -22,6 +22,7 @@ def cloud_mask_l4_7_C1(img):
     .Or(pqa.eq(68)).Or(pqa.eq(132))
     return ee.Image(img).updateMask(mask)
 
+
 # Cloud masking for C1, L8
 def cloud_mask_l8_C1(img):
     pqa = ee.Image(img).select(['pixel_qa'])
@@ -29,17 +30,22 @@ def cloud_mask_l8_C1(img):
     .Or(pqa.eq(388)).Or(pqa.eq(836)).Or(pqa.eq(900))
     return ee.Image(img).updateMask(mask)
 
+
 def stack_renamer_l4_7_C1(img):
-     band_list = ['B1', 'B2','B3','B4','B5','B7', 'B6','pixel_qa']
-     name_list = ['BLUE','GREEN','RED','NIR','SWIR1','SWIR2','THERMAL','pixel_qa']
-     return ee.Image(img).select(band_list).rename(name_list)
+    band_list = ['B1', 'B2', 'B3', 'B4', 'B5', 'B7',  'B6', 'pixel_qa']
+    name_list = ['BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2', 'THERMAL',
+                 'pixel_qa']
+    return ee.Image(img).select(band_list).rename(name_list)
+
 
 def stack_renamer_l8_C1(img):
-     band_list = ['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B10','pixel_qa'];
-     name_list = ['BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2','THERMAL','pixel_qa'];
-     return ee.Image(img).select(band_list).rename(name_list);
+    band_list = ['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B10', 'pixel_qa']
+    name_list = ['BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2', 'THERMAL',
+                 'pixel_qa']
+    return ee.Image(img).select(band_list).rename(name_list)
 
-#filter and merge collections
+
+# filter and merge collections
 def get_full_collection(coords, year_range, doy_range):
     point = ee.Geometry.Point(coords)
     l8_renamed = collection_filtering(point, 'LANDSAT/LC08/C01/T1_SR', year_range, doy_range)\
@@ -62,42 +68,42 @@ def get_full_collection(coords, year_range, doy_range):
 # Utility function for calculating spectral indices
 def doIndices(fullImage):
 
-  image = fullImage.select(['BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2'])
+    image = fullImage.select(['BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2'])
 
-  # Parameters
-  cfThreshold = 20000
-  soil = [2000, 3000, 3400, 5800, 6000, 5800]
-  gv = [500, 900, 400, 6100, 3000, 1000]
-  npv = [1400, 1700, 2200, 3000, 5500, 3000]
-  shade= [0, 0, 0, 0, 0, 0]
-  cloud= [9000, 9600, 8000, 7800, 7200, 6500]
-  cfThreshold = ee.Image.constant(cfThreshold)
+    # Parameters
+    cfThreshold = 20000
+    soil = [2000, 3000, 3400, 5800, 6000, 5800]
+    gv = [500, 900, 400, 6100, 3000, 1000]
+    npv = [1400, 1700, 2200, 3000, 5500, 3000]
+    shade = [0, 0, 0, 0, 0, 0]
+    cloud = [9000, 9600, 8000, 7800, 7200, 6500]
+    cfThreshold = ee.Image.constant(cfThreshold)
 
-  #  Do spectral unmixing on a single image  */
-  unmixImage = ee.Image(image).unmix([gv, shade, npv, soil, cloud], True,True).multiply(ee.Image(10000))\
-               .rename(['band_0', 'band_1', 'band_2','band_3','band_4'])
-  newImage = ee.Image(fullImage).addBands(unmixImage)
+    #  Do spectral unmixing on a single image  */
+    unmixImage = ee.Image(image).unmix([gv, shade, npv, soil, cloud], True,True).multiply(ee.Image(10000))\
+                 .rename(['band_0', 'band_1', 'band_2','band_3','band_4'])
+    newImage = ee.Image(fullImage).addBands(unmixImage)
 
-  ndfi = ee.Image(unmixImage).expression(
-    '((GV / (10000 - SHADE)) - (NPV + SOIL)) / ((GV / (10000 - SHADE)) + NPV + SOIL)', {
-      'GV': ee.Image(unmixImage).select('band_0'),
-      'SHADE': ee.Image(unmixImage).select('band_1'),
-      'NPV': ee.Image(unmixImage).select('band_2'),
-      'SOIL': ee.Image(unmixImage).select('band_3')
-    })
-  ndvi = ee.Image(image).normalizedDifference(['NIR','RED']).rename('NDVI')
-  evi = ee.Image(image).expression(
-        'float(2.5*(((B4/10000) - (B3/10000)) / ((B4/10000) + (6 * (B3/10000)) - (7.5 * (B1/10000)) + 1)))',
-        {
-            'B4': ee.Image(image).select(['NIR']),
-            'B3': ee.Image(image).select(['RED']),
-            'B1': ee.Image(image).select(['BLUE'])
-        }).rename('EVI')
+    ndfi = ee.Image(unmixImage).expression(
+      '((GV / (10000 - SHADE)) - (NPV + SOIL)) / ((GV / (10000 - SHADE)) + NPV + SOIL)', {
+        'GV': ee.Image(unmixImage).select('band_0'),
+        'SHADE': ee.Image(unmixImage).select('band_1'),
+        'NPV': ee.Image(unmixImage).select('band_2'),
+        'SOIL': ee.Image(unmixImage).select('band_3')
+      })
+    ndvi = ee.Image(image).normalizedDifference(['NIR','RED']).rename('NDVI')
+    evi = ee.Image(image).expression(
+          'float(2.5*(((B4/10000) - (B3/10000)) / ((B4/10000) + (6 * (B3/10000)) - (7.5 * (B1/10000)) + 1)))',
+          {
+              'B4': ee.Image(image).select(['NIR']),
+              'B3': ee.Image(image).select(['RED']),
+              'B1': ee.Image(image).select(['BLUE'])
+          }).rename('EVI')
 
-  return ee.Image(newImage)\
-      .addBands([ndfi.rename(['NDFI']).multiply(10000), ndvi.multiply(10000), evi.multiply(10000)])\
-      .select(['band_0','band_1','band_2','band_3','NDFI','NDVI','EVI','BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2','THERMAL','pixel_qa'])\
-      .rename(['GV','Shade','NPV','Soil','NDFI','NDVI','EVI','BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2','THERMAL','pixel_qa'])\
+    return ee.Image(newImage)\
+        .addBands([ndfi.rename(['NDFI']).multiply(10000), ndvi.multiply(10000), evi.multiply(10000)])\
+        .select(['band_0','band_1','band_2','band_3','NDFI','NDVI','EVI','BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2','THERMAL','pixel_qa'])\
+        .rename(['GV','Shade','NPV','Soil','NDFI','NDVI','EVI','BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2','THERMAL','pixel_qa'])\
 
 
 
@@ -462,8 +468,10 @@ def handle_draw(action, geo_json, current_band, year_range, doy_range):
 # Calculate 90m bbox around clicked point for opportunistic
 # training data collection
 def calculate_clicked_bbox(geojson):
-    # TODO: Calculate target coordinate system
-    target_proj = ee.Projection('EPSG:32618')
-    click_feat = ee.Feature(geojson)
-    bbox = click_feat.buffer(45, 0, target_proj).bounds(0.1)
+    click_geom = ee.Geometry(geojson['geometry'])
+    # Asset with projection info per zone
+    all_zones = ee.FeatureCollection("users/parevalo_bu/measures/measures_zones_crs")
+    zone = all_zones.filterBounds(click_geom).first()
+    target_proj = zone.get("CRS")
+    bbox = click_geom.buffer(45, 0, target_proj).bounds(0.1, target_proj)
     return bbox
