@@ -346,7 +346,7 @@ class measures(object):
                                          ['Density', 'Closed (60-70%)',
                                           'Open (30-60%)', 'Sparse (<30%)'])
                 measures.veg_selector.disabled = False
-                measures.drop4.set_trait('options', ['Trees?', 'Yes', 'No'])
+                measures.drop4.set_trait('options', ['Woody vegetation', 'Yes', 'No'])
             elif selection.new == 'No':
                 measures.drop3.set_trait('options', ['Dominant Cover?', 'Water',
                                                      'Bare', 'Developed'])
@@ -392,7 +392,7 @@ class measures(object):
     # Change dropdowns based on drop4 selection
     def drop4_clicked(selection):
 
-        if 'Trees?' in measures.drop4.options:
+        if 'Woody vegetation' in measures.drop4.options:
             if selection.new == 'Yes':
                 measures.drop5.set_trait('options', ['Height >5m & Canopy >30%',
                                                      'Yes', 'No'])
