@@ -822,7 +822,7 @@ class measures(object):
         changeAgent = ', '.join(changeAgent)
         confCA = measures.ca_confidence.value
         ca_other = measures.change_other.value
-
+#
         if ca_other == 'Specify other':
             ca_other = 'N/A'
         seg_notes = measures.notes_seg_trend.value
@@ -875,11 +875,15 @@ class measures(object):
                 if measures.drop4.value == 'No':  #Herbaceous
                     class1 = 'Herbaceous'
                     herbaceousType = measures.drop5.value
-                elif measures.drop4.value == 'Yes':
-                    class1 = 'Forest'
-                    forestPhenology = measures.drop6.value
-                    leafType = measures.drop7.value
-                    location = measures.drop8.value
+                else:
+                    if measures.drop5.value == 'Yes':
+                        class1 = 'Forest'
+                        forestPhenology = measures.drop6.value
+                        leafType = measures.drop7.value
+                        location = measures.drop8.value
+                    elif measures.drop5.value == 'No':
+                        class1 = 'Shrub'
+                        shrubType = measures.drop6.value 
 
         conf = measures.confidence.value
         notes_value = measures.notes.value
