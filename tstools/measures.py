@@ -65,11 +65,11 @@ class measures(object):
     dbPath = os.getcwd() + '/measures_database'
     command = '''CREATE TABLE measures
                  (id text, lat text, lon text, year1 text, year2 text, 
-                  coverType text, condition text, class1 text, water text, 
+                  coverType text, class1 text, water text, 
                   bare text, albedo text, use text, height text, 
-                  transport text, impervious text, density text, vegType text, 
+                  transport text, impervious text, density text, 
                   herbType text, shrubType text, phenology text, leafType text,
-                  location text, conf text, notes1 text, segType text, 
+                  location text, vegType text, conf text, notes1 text, segType text, 
                   direction text, changeAgent text, confCA text, ca_other text, 
                   seg_notes text, breakYear text, breakRange1 text, 
                   breakRange2 text)'''
@@ -348,7 +348,7 @@ class measures(object):
                 measures.veg_selector.disabled = False
                 measures.drop4.set_trait('options', ['Woody vegetation', 'Yes', 'No'])
             elif selection.new == 'No':
-                measures.drop3.set_trait('options', ['Dominant Cover?', 'Water',
+                measures.drop3.set_trait('options', ['Dominant Cover', 'Water',
                                                      'Bare', 'Developed'])
                 measures.drop4.set_trait('options', ['Decision 4'])
                 measures.drop5.set_trait('options', ['Decision 5'])
@@ -364,7 +364,7 @@ class measures(object):
     # Change dropdowns based on drop3 selection
     def drop3_clicked(selection):
 
-        if 'Dominant Cover?' in measures.drop3.options:
+        if 'Dominant Cover' in measures.drop3.options:
             measures.veg_selector.disabled = True
             if selection.new == 'Water':
                 water_opts = ['Water Type', 'Shore/Inter tidal', 'Shallows', 
@@ -829,10 +829,6 @@ class measures(object):
 
         # Break
         condition = measures.break_check.value
-        if condition:
-            condition = 'Break'
-        else:
-            condition = 'No Break'
         b_changeAgent = measures.b_change_selector.value
         b_changeAgent = [str(i) for i in b_changeAgent]
         b_changeAgent = ', '.join(b_changeAgent)
@@ -899,12 +895,12 @@ class measures(object):
             lat = measures.samplept_geojson['coordinates'][1]
             lon = measures.samplept_geojson['coordinates'][0]
 
-        sampleInput = (idSample, lat, lon, year1, year2, coverType, condition,
+        sampleInput = (idSample, lat, lon, year1, year2, coverType,
                        class1, waterType, bareType, albedo, use, height,
-                       transport, impervious, density, vegType1,
+                       transport, impervious, density,
                        herbaceousType, shrubType, forestPhenology, leafType,
-                       location, conf, notes_value, seg_type, direction,
-                       changeAgent, confCA, ca_other, seg_notes,
+                       location, vegType1, conf, notes_value, seg_type, 
+                       direction, changeAgent, confCA, ca_other, seg_notes,
                        break_year, break_range1, break_range2)
 
         # Put sample information into database
@@ -919,11 +915,11 @@ class measures(object):
 
         # Save to drive
         sampleInputList = [str(idSample), str(lat), str(lon), str(year1),
-                           str(year2), coverType, condition,
+                           str(year2),  coverType, 
                            class1, waterType, bareType, albedo,
                            use, height, transport, impervious, density,
-                           vegType1, herbaceousType, shrubType,
-                           forestPhenology, leafType, location, str(conf),
+                           herbaceousType, shrubType, forestPhenology, 
+                           leafType, location, vegType1, str(conf),
                            notes_value, seg_type, direction, changeAgent,
                            str(confCA), ca_other, seg_notes]
 
