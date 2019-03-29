@@ -473,5 +473,5 @@ def calculate_clicked_bbox(geojson):
     all_zones = ee.FeatureCollection("users/parevalo_bu/measures/measures_zones_crs")
     zone = all_zones.filterBounds(click_geom).first()
     target_proj = zone.get("CRS")
-    bbox = click_geom.buffer(45, 0, target_proj).bounds(0.1, target_proj)
+    bbox = click_geom.buffer(45, 0, target_proj).bounds(0.01, target_proj)
     return bbox
