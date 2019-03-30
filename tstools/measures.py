@@ -829,6 +829,11 @@ class measures(object):
 
         # Break
         condition = measures.break_check.value
+        if condition:
+            condition = 'Break'
+        else:
+            condition = 'No Break'
+
         b_changeAgent = measures.b_change_selector.value
         b_changeAgent = [str(i) for i in b_changeAgent]
         b_changeAgent = ', '.join(b_changeAgent)
