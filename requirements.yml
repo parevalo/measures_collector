@@ -3,7 +3,7 @@ channels:
     - conda-forge
 dependencies:
     # Base
-    - python=3.6
+    - python>=3.7
     - numpy
     - scipy
     # Statistics
@@ -21,6 +21,7 @@ dependencies:
     - matplotlib
     - bqplot
     # Interactive
+    - nodejs
     - jupyter
     - jupyterlab
     - notebook
