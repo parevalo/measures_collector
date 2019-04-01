@@ -1,5 +1,6 @@
-# tstools_online
-Visualize time series obtained from Google Earth Engine and run pyccd on them
+# masures_collector
+Tool to collect training and reference data for the measures project at Boston
+University. 
 
 In order to use the Google Earth Engine API you need to have an active account.
 Check the installation instructions to set up the environment and authentication
@@ -14,6 +15,5 @@ They can be installed with the commands below.
 - `jupyter labextension install bqplot`
 - `jupyter labextension install qgrid`
 
-
-The second extension requires [nodejs](https://nodejs.org/en/).
-
+If you're interested in a simple visualization tool that shows time series
+and pyccd models, check [https://github.com/parevalo/tstools-online].
