@@ -1,4 +1,4 @@
-# masures_collector
+# measures_collector
 Tool to collect training and reference data for the measures project at Boston
 University. 
 
