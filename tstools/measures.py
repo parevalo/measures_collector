@@ -396,12 +396,18 @@ class measures(object):
             if selection.new == 'Yes':
                 measures.drop5.set_trait('options', ['Height >5m & Canopy >30%',
                                                      'Yes', 'No'])
+                measures.drop6.set_trait('options', ['Decision 6'])
+                measures.drop7.set_trait('options', ['Decision 7'])
+                measures.drop8.set_trait('options', ['Decision 8'])
             elif selection.new == 'No':
                 measures.drop5.set_trait('options', ['Herbaceous Type',
                                                      'Grassland', 'Pasture',
                                                      'Row crops',
                                                      'Lawn/Urban Grass',
                                                      'Moss/Lichen'])
+                measures.drop6.set_trait('options', ['Decision 6'])
+                measures.drop7.set_trait('options', ['Decision 7'])
+                measures.drop8.set_trait('options', ['Decision 8'])
 
 
     # Change dropdowns based on drop5 selection
