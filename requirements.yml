@@ -3,6 +3,7 @@ channels:
     - conda-forge
 dependencies:
     # Base
+    - pip
     - python>=3.7
     - numpy
     - scipy
@@ -39,4 +40,4 @@ dependencies:
         - appmode
         - google-api-python-client
         - earthengine-api
-        - git+git://github.com/USGS-EROS/lcmap-pyccd.git
+        - lcmap-pyccd
