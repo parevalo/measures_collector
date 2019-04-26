@@ -204,7 +204,8 @@ class measures(object):
     # HTML
     pt_message = plots.make_html('<b>Current ID:</b>')
     time_label = plots.make_html('')
-    coord_message = plots.make_html('Lat, Lon: ')
+    sample_coord_message = plots.make_html('Sample Lat, Lon: ')
+    click_coord_message = plots.make_html('Clicked Lat, Lon: ')
     selected_label = plots.make_html('ID of selected point')
     hover_label = plots.make_html('Test Value')
     text_brush = plots.make_html('Selected year range:')
@@ -688,6 +689,9 @@ class measures(object):
         _col, _df = utils.handle_draw(action, geo_json, current_band, 
                                       year_range, doy_range)
         measures.click_geojson = geo_json
+        coord1 = measures.click_geojson['geometry']['coordinates'][0]
+        coord2 = measures.click_geojson['geometry']['coordinates'][1]
+        measures.click_coord_message.value = "Click Lat, Lon: {}, {}".format(coord2, coord1)
         measures.click_df = _df
         measures.click_col = _col
         
@@ -716,7 +720,7 @@ class measures(object):
         measures.samplept_geojson = measures.fc_df['geometry'][measures.current_id]
         coord1 = measures.samplept_geojson['coordinates'][0]
         coord2 = measures.samplept_geojson['coordinates'][1]
-        measures.coord_message.value = "Lat, Lon: {}, {}".format(coord2, coord1)
+        measures.sample_coord_message.value = "Sample Lat, Lon: {}, {}".format(coord2, coord1)
         lft.add_map_point(measures.samplept_geojson, zoom, measures.m, kml, name)
 
     # Get time series data for location.
