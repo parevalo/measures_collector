@@ -54,7 +54,6 @@ class measures(object):
     table = pd.DataFrame()
     band_list = ['BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2', 'BRIGHTNESS',
                  'GREENNESS', 'WETNESS']
-    year_range = [1986, 2018]
     doy_range = [1, 365]
     step = 1  #in years
     current_id = 0
@@ -88,10 +87,10 @@ class measures(object):
     b_ca_confidence = plots.make_slider(0, 0, 3, 1, '', disabled=True)
 
     ylim = plots.make_range_slider([0, 4000], -10000, 10000, 500, 'YLim:')
-    xlim = plots.make_range_slider([2000, 2018], 1984, 2019, 1, 'XLim:')
+    xlim = plots.make_range_slider([2000, 2020], 1984, 2020, 1, 'XLim:')
 
     ylim2 = plots.make_range_slider([0, 4000], -10000, 10000, 500, 'YLim:')
-    xlim2 = plots.make_range_slider([2000, 2018], 1984, 2019, 1, 'XLim:')
+    xlim2 = plots.make_range_slider([2000, 2020], 1984, 2020, 1, 'XLim:')
 
     # Dropdown boxes
     drop1 = plots.make_drop('Persistant Ice?', ['Persistant Ice?', 'Yes','No'], 
@@ -513,7 +512,6 @@ class measures(object):
 
         measures.lc1_x.min = datetime.date(measures.xlim.value[0], 2, 1)
         measures.lc1_x.max = datetime.date(measures.xlim.value[1], 2, 1)
-        measures.year_range = [measures.xlim.value[0], measures.xlim.value[1]]
 
     # Change y axis for the clicked point
     def change_yaxis2(value):
@@ -598,6 +596,9 @@ class measures(object):
     # Return to sample location
     def return_to_sample(b):
         measures.map_point()
+        measures.get_ts()
+        measures.plot_ts(measures.lc2, 'ts')
+        measures.plot_ts(measures.lc8, 'doy')
 
     # Update the table based on current ID
     def change_table(b):
@@ -684,10 +685,9 @@ class measures(object):
     # Plot ts for point
     def do_draw(self, action, geo_json):
         current_band = measures.band_list[measures.band_index2]
-        year_range = measures.year_range
         doy_range = measures.doy_range
         _col, _df = utils.handle_draw(action, geo_json, current_band, 
-                                      year_range, doy_range)
+                                      list(measures.xlim2.value), doy_range)
         measures.click_geojson = geo_json
         coord1 = measures.click_geojson['geometry']['coordinates'][0]
         coord2 = measures.click_geojson['geometry']['coordinates'][1]
@@ -727,10 +727,9 @@ class measures(object):
     def get_ts():
         measures.error_label.value = 'Loading'
         coords = measures.fc_df['geometry'][measures.current_id]['coordinates']
-        year_range = measures.year_range
         doy_range = measures.doy_range
         measures.current_band = measures.band_list[measures.band_index1]
-        measures.sample_col = utils.get_full_collection(coords, year_range,
+        measures.sample_col = utils.get_full_collection(coords, list(measures.xlim.value),
                                                         doy_range)
         measures.sample_df = utils.get_df_full(measures.sample_col,
                                                coords).dropna()
