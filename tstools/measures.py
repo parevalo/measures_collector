@@ -316,11 +316,11 @@ class measures(object):
     # Reset dropdowns
     def reset_drops():
 
-        measures.drop4.set_trait('options', ['Decision 4'])
-        measures.drop5.set_trait('options', ['Decision 5'])
-        measures.drop6.set_trait('options', ['Decision 6'])
-        measures.drop7.set_trait('options', ['Decision 7'])
-        measures.drop8.set_trait('options', ['Decision 8'])
+        measures.drop4.set_trait('options', ['Decision 5'])
+        measures.drop5.set_trait('options', ['Decision 6'])
+        measures.drop6.set_trait('options', ['Decision 7'])
+        measures.drop7.set_trait('options', ['Decision 8'])
+        measures.drop8.set_trait('options', ['Decision 9'])
         measures.veg_selector.disabled = True
 
 
@@ -330,6 +330,7 @@ class measures(object):
         if selection.new == 'No':
             measures.drop2.set_trait('options',
                                      ['>30% Vegetated?', 'Yes', 'No'])
+            measures.drop3.set_trait('options', ['Decision 4'])
         elif selection.new == 'Yes':
             measures.drop2.set_trait('options', ['Ice/Snow'])
             measures.drop3.set_trait('options',
@@ -347,14 +348,18 @@ class measures(object):
                                           'Open (30-60%)', 'Sparse (<30%)'])
                 measures.veg_selector.disabled = False
                 measures.drop4.set_trait('options', ['Woody vegetation', 'Yes', 'No'])
+                measures.drop5.set_trait('options', ['Decision 6'])
+                measures.drop6.set_trait('options', ['Decision 7'])
+                measures.drop7.set_trait('options', ['Decision 8'])
+                measures.drop8.set_trait('options', ['Decision 9'])
             elif selection.new == 'No':
                 measures.drop3.set_trait('options', ['Dominant Cover', 'Water',
                                                      'Bare', 'Developed'])
-                measures.drop4.set_trait('options', ['Decision 4'])
-                measures.drop5.set_trait('options', ['Decision 5'])
-                measures.drop6.set_trait('options', ['Decision 6'])
-                measures.drop7.set_trait('options', ['Decision 7'])
-                measures.drop8.set_trait('options', ['Decision 8'])
+                measures.drop4.set_trait('options', ['Decision 5'])
+                measures.drop5.set_trait('options', ['Decision 6'])
+                measures.drop6.set_trait('options', ['Decision 7'])
+                measures.drop7.set_trait('options', ['Decision 8'])
+                measures.drop8.set_trait('options', ['Decision 9'])
                 measures.veg_selector.disabled = True
 
         else:
@@ -370,10 +375,18 @@ class measures(object):
                 water_opts = ['Water Type', 'Shore/Inter tidal', 'Shallows', 
                               'River', 'Lake/Reservoir', 'Ocean']
                 measures.drop4.set_trait('options', water_opts)
+                measures.drop5.set_trait('options', ['Decision 6'])
+                measures.drop6.set_trait('options', ['Decision 7'])
+                measures.drop7.set_trait('options', ['Decision 8'])
+                measures.drop8.set_trait('options', ['Decision 9'])
             elif selection.new == 'Bare':
                 bare_opts = ['Bare Type', 'Soil', 'Rock', 'Quarry (Active)',
                              'Beach/Sand']
                 measures.drop4.set_trait('options', bare_opts)
+                measures.drop5.set_trait('options', ['Decision 6'])
+                measures.drop6.set_trait('options', ['Decision 7'])
+                measures.drop7.set_trait('options', ['Decision 8'])
+                measures.drop8.set_trait('options', ['Decision 9'])
             elif selection.new == 'Developed':
                 albedo_opts = ['Surface Albedo', 'High', 'Low', 'Mixed']
                 dev_use = ['Use', 'Residential', 'Commercial/Industrial']
@@ -396,12 +409,18 @@ class measures(object):
             if selection.new == 'Yes':
                 measures.drop5.set_trait('options', ['Height >5m & Canopy >30%',
                                                      'Yes', 'No'])
+                measures.drop6.set_trait('options', ['Decision 7'])
+                measures.drop7.set_trait('options', ['Decision 8'])
+                measures.drop8.set_trait('options', ['Decision 9'])
             elif selection.new == 'No':
                 measures.drop5.set_trait('options', ['Herbaceous Type',
                                                      'Grassland', 'Pasture',
                                                      'Row crops',
                                                      'Lawn/Urban Grass',
                                                      'Moss/Lichen'])
+                measures.drop6.set_trait('options', ['Decision 7'])
+                measures.drop7.set_trait('options', ['Decision 8'])
+                measures.drop8.set_trait('options', ['Decision 9'])
 
 
     # Change dropdowns based on drop5 selection
@@ -419,6 +438,8 @@ class measures(object):
             elif selection.new == 'No':
                 measures.drop6.set_trait('options', ['Shrub Type', 'Evergreen',
                                                      'Deciduous', 'Mixed'])
+                measures.drop7.set_trait('options', ['Decision 8'])
+                measures.drop8.set_trait('options', ['Decision 9'])
 
 
     # Check validity of current sample
@@ -979,10 +1000,11 @@ class measures(object):
         measures.drop1.set_trait('value', 'Persistant Ice?')
         measures.drop2.set_trait('options', ['Decision 3'])
         measures.drop3.set_trait('options', ['Decision 4'])
-        measures.drop5.set_trait('options', ['Decision 5'])
-        measures.drop6.set_trait('options', ['Decision 6'])
-        measures.drop7.set_trait('options', ['Decision 7'])
-        measures.drop8.set_trait('options', ['Decision 8'])
+        measures.drop4.set_trait('options', ['Decision 5'])
+        measures.drop5.set_trait('options', ['Decision 6'])
+        measures.drop6.set_trait('options', ['Decision 7'])
+        measures.drop7.set_trait('options', ['Decision 8'])
+        measures.drop8.set_trait('options', ['Decision 9'])
         measures.veg_selector.set_trait('value', ('Select a modifier',))
         measures.veg_selector.disabled = True
         measures.years.set_trait('value', [1990, 1991])
