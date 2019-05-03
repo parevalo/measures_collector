@@ -1142,7 +1142,13 @@ class measures(object):
     idBox.on_submit(go_to_sample)
 
     # Mapping
+    measure = ipyleaflet.MeasureControl(position='topleft',
+                                        active_color = 'orange',
+                                        primary_length_unit = 'kilometers')
+    measure.completed_color = 'red'
+
     dc.on_draw(do_draw)
     m.add_control(dc)
+    m.add_control(measure)
     m.add_control(ipyleaflet.LayersControl())
 
