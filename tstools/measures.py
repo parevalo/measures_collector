@@ -10,6 +10,7 @@ import os, qgrid, datetime, sqlite3, time
 import pandas as pd
 import tstools.plots as plots
 import ipywidgets as widgets
+import shapely
 
 
 # Sample interpretation to collect training data for MEaSUREs
@@ -53,7 +54,7 @@ class measures(object):
     PyCCDdf = pd.DataFrame()
     table = pd.DataFrame()
     band_list = ['BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2', 'BRIGHTNESS',
-                 'GREENNESS', 'WETNESS']
+                 'GREENNESS', 'WETNESS', 'NDVI']
     doy_range = [1, 365]
     step = 1  #in years
     current_id = 0
@@ -63,14 +64,14 @@ class measures(object):
 
     dbPath = os.getcwd() + '/measures_database'
     command = '''CREATE TABLE measures
-                 (id text, lat text, lon text, year1 text, year2 text, 
-                  coverType text, class1 text, water text, 
-                  bare text, albedo text, use text, height text, 
-                  transport text, impervious text, density text, 
+                 (id text, lat text, lon text, year1 text, year2 text,
+                  coverType text, class1 text, water text,
+                  bare text, albedo text, use text, height text,
+                  transport text, impervious text, density text,
                   herbType text, shrubType text, phenology text, leafType text,
-                  location text, vegType text, conf text, notes1 text, segType text, 
-                  direction text, changeAgent text, confCA text, ca_other text, 
-                  seg_notes text, breakYear text, breakRange1 text, 
+                  location text, vegType text, conf text, notes1 text, segType text,
+                  direction text, changeAgent text, confCA text, ca_other text,
+                  seg_notes text, breakYear text, breakRange1 text,
                   breakRange2 text)'''
     conn = sql.make_db(dbPath, command)
 
@@ -79,7 +80,7 @@ class measures(object):
 
     # Sliders
     years = plots.make_range_slider([1990, 1991], 1990, 2018, 1, 'Years:')
-    break_years = plots.make_range_slider([1990, 1991], 1990, 2018, 1, 
+    break_years = plots.make_range_slider([1990, 1991], 1990, 2018, 1,
                                           'Confidence:', disabled=True)
     break_year = plots.make_slider(1990, 1991, 2018, 1, 'Year:', disabled=True)
     confidence = plots.make_slider(0, 0, 3, 1, 'Confidence:')
@@ -93,7 +94,7 @@ class measures(object):
     xlim2 = plots.make_range_slider([2000, 2020], 1984, 2020, 1, 'XLim:')
 
     # Dropdown boxes
-    drop1 = plots.make_drop('Persistant Ice?', ['Persistant Ice?', 'Yes','No'], 
+    drop1 = plots.make_drop('Persistant Ice?', ['Persistant Ice?', 'Yes','No'],
                             'Decision 2')
     drop2 = plots.make_drop('Decision 3', ['Decision 3'], 'Decision 3')
     drop3 = plots.make_drop('Decision 4', ['Decision 4'], 'Decision 4')
@@ -102,7 +103,7 @@ class measures(object):
     drop6 = plots.make_drop('Decision 7', ['Decision 7'], 'Decision 7')
     drop7 = plots.make_drop('Decision 8', ['Decision 8'], 'Decision 8')
     drop8 = plots.make_drop('Decision 9', ['Decision 9'], 'Decision 9')
-    drop9 = plots.make_drop('Select type', ['Select type', 'Stable', 
+    drop9 = plots.make_drop('Select type', ['Select type', 'Stable',
                                             'Transitional'], '')
     drop0 = plots.make_drop('Dominant or Secondary?', ['Dominant or Secondary?',
                                                        'Dominant', 'Secondary'],
@@ -121,18 +122,18 @@ class measures(object):
 
     # Select multiple
     _veg_selector = ['Select a modifier', 'None', 'Cropland', 'Plantation',
-                     'Wetland', 'Riparian/Flood', 'Mangrove']
+                     'Wetland', 'Riparian/Flood', 'Mangrove', 'Trees/Shrubs Present']
     veg_selector = plots.make_selector(['Select a modifier'], _veg_selector,
-                                       'Veg Type:', disabled=True)
+                                       'Veg Modifier:', disabled=True)
     _change_selector = ['None', 'Deforestation/Logging', 'Fire', 'Insect damage',
                         'Urban Dev.', 'Flooding', 'Decline/Degradation',
-                        'Regrowth', 'Riparian/Water shift', 'Unknown',
+                        'Regrowth', 'Riparian/Water shift', 'Drought','Unknown',
                         'Other (Specify)']
     change_selector = plots.make_selector(['None'], _change_selector, '',
                                           disabled=True)
     _b_change_selector = ['None', 'Deforestation/Logging', 'Fire',
                           'Insect damage', 'Urban Dev.', 'Flooding',
-                          'Decline/Degradation', 'Regrowth',
+                          'Decline/Degradation', 'Regrowth','Drought',
                           'Riparian/Water shift', 'Other (Specify)']
     b_change_selector = plots.make_selector(['None'], _b_change_selector, '',
                                             disabled=True)
@@ -165,18 +166,22 @@ class measures(object):
                                         time series', '', 'Notes',
                                         layout=widgets.Layout(), disabled=True) # TODO: save this
     spreadsheet = plots.make_text('Google Spreadsheet Credential JSON',
-                                  'Google Spreadsheet Credential JSON', 
+                                  'Google Spreadsheet Credential JSON',
                                   'Credentials:')
     spreadName = plots.make_text('Google Spreadsheet Name',
                                   'Google Spreadsheet Name', 'SS Name:')
     sampleWidget = plots.make_text('Path to sample feature collection',
-                                   'Path to sample feature collection', 
+                                   'Path to sample feature collection',
                                    'Path:')
 
     stretch_min = plots.make_text_float(0, 0, 'Min:')
     stretch_max = plots.make_text_float(6000, 6000, 'Max:')
     zoom_box = plots.make_text_float(12, 12, 'Zoom:')
     idBox = plots.make_text('0', '0', 'ID:')
+    go_to_lat = plots.make_text('0', 'Lat','')
+    go_to_lon = plots.make_text('0', 'Lon','')
+    go_to_lat.layout=widgets.Layout(width='20%')
+    go_to_lon.layout=widgets.Layout(width='20%')
 
     # Buttons
     validate = plots.make_button(False, 'Validate', icon='check')
@@ -219,9 +224,9 @@ class measures(object):
 
     # Scales
     # Dates
-    lc1_x = plots.make_bq_scale('date', datetime.date(xlim.value[0], 2, 1), 
+    lc1_x = plots.make_bq_scale('date', datetime.date(xlim.value[0], 2, 1),
                                 datetime.date(xlim.value[1], 1, 1))
-    lc1_x2 = plots.make_bq_scale('date', datetime.date(xlim.value[0], 2, 1), 
+    lc1_x2 = plots.make_bq_scale('date', datetime.date(xlim.value[0], 2, 1),
                                  datetime.date(xlim.value[1], 1, 1))
 
     # DOY
@@ -232,24 +237,24 @@ class measures(object):
     lc2_y2 = plots.make_bq_scale('linear', ylim.value[0], ylim.value[1])
 
     # plots
-    lc2 = plots.make_bq_plot('scatter', [], [], {'x': lc1_x, 'y': lc2_y}, 
+    lc2 = plots.make_bq_plot('scatter', [], [], {'x': lc1_x, 'y': lc2_y},
                              [1, 1],
                              {'click': 'select', 'hover': 'tooltip'},
-                             {'opacity': 1.0, 'fill': 'DarkOrange', 
+                             {'opacity': 1.0, 'fill': 'DarkOrange',
                               'stroke': 'Red'},
-                             {'opacity': 0.5}, display_legend=True, 
+                             {'opacity': 0.5}, display_legend=True,
                              labels=['Sample point'])
 
-    lc3 = plots.make_bq_plot('scatter', [], [], {'x': lc1_x2, 'y': lc2_y2}, 
+    lc3 = plots.make_bq_plot('scatter', [], [], {'x': lc1_x2, 'y': lc2_y2},
                              [1, 1],
                              {'click': 'select', 'hover': 'tooltip'},
-                             {'opacity': 1.0, 'fill': 'DarkOrange', 
+                             {'opacity': 1.0, 'fill': 'DarkOrange',
                               'stroke': 'Red'},
-                             {'opacity': 0.5}, display_legend=True, 
+                             {'opacity': 0.5}, display_legend=True,
                              labels=['Clicked point'])
 
     lc4 = plots.make_bq_plot('lines', [], [], {'x': lc1_x, 'y': lc2_y}, [1, 1],
-                             {}, {}, {}, colors=['black'], stroke_width=3, 
+                             {}, {}, {}, colors=['black'], stroke_width=3,
                              labels=['PyCCD Model'], display_legend=False)
 
     lc5 = plots.make_bq_plot('scatter', [], [], {'x': lc1_x, 'y': lc2_y},
@@ -343,11 +348,13 @@ class measures(object):
 
         if '>30% Vegetated?' in measures.drop2.options:
             if selection.new == 'Yes':
-                measures.drop3.set_trait('options', 
-                                         ['Density', 'Closed (60-70%)',
-                                          'Open (30-60%)', 'Sparse (<30%)'])
+              #  measures.drop3.set_trait('options',
+              #                           ['Density', 'Closed (60-70%)',
+              #                            'Open (30-60%)', 'Sparse (<30%)'])
+                measures.drop3.set_trait('options',['Trees > 30%?', 'Yes','No'])
                 measures.veg_selector.disabled = False
-                measures.drop4.set_trait('options', ['Woody vegetation', 'Yes', 'No'])
+              #  measures.drop4.set_trait('options', ['Woody vegetation', 'Yes', 'No'])
+                measures.drop4.set_trait('options', ['Decision 5'])
                 measures.drop5.set_trait('options', ['Decision 6'])
                 measures.drop6.set_trait('options', ['Decision 7'])
                 measures.drop7.set_trait('options', ['Decision 8'])
@@ -372,7 +379,7 @@ class measures(object):
         if 'Dominant Cover' in measures.drop3.options:
             measures.veg_selector.disabled = True
             if selection.new == 'Water':
-                water_opts = ['Water Type', 'Shore/Inter tidal', 'Shallows', 
+                water_opts = ['Water Type', 'Shore/Inter tidal', 'Shallows',
                               'River', 'Lake/Reservoir', 'Ocean']
                 measures.drop4.set_trait('options', water_opts)
                 measures.drop5.set_trait('options', ['Decision 6'])
@@ -393,7 +400,7 @@ class measures(object):
                 bld_h_opts = ['Building Height', 'No Buildings', '1-2 Stories',
                               '3-5 Stories', '5+ Stories']
                 transp_opts = ['Transport', 'Road', 'Not Applicable']
-                imperv_opts = ['% Impervious', 'High (60-100)', 
+                imperv_opts = ['% Impervious', 'High (60-100)',
                                'Medium (30-60)', 'Low (<30)']
                 measures.drop4.set_trait('options', albedo_opts)
                 measures.drop5.set_trait('options', dev_use)
@@ -401,18 +408,39 @@ class measures(object):
                 measures.drop7.set_trait('options', transp_opts)
                 measures.drop8.set_trait('options', imperv_opts)
 
+        elif 'Trees > 30%?' in measures.drop3.options:
+            if selection.new == 'Yes': # Forest
+                measures.drop4.set_trait('options', ['Forest Phenology', 'Evergreen',
+                                                     'Deciduous', 'Mixed'])
+                measures.drop5.set_trait('options', ['Leaf Type', 'Broad',
+                                                     'Needle', 'Mixed',
+                                                     'Unsure'])
+                measures.drop6.set_trait('options', ['Location', 'Interior',
+                                                     'Edge'])
+                measures.drop7.set_trait('options',
+                                         ['Density', 'Closed (60-70%)',
+                                          'Open (30-60%)', 'Sparse (<30%)'])
+                measures.drop8.set_trait('options',['Decision 9'])
+            else:
+                measures.drop4.set_trait('options', ['Shrubs >30%?', 'Yes','No'])
+                measures.drop5.set_trait('options', ['Decision 6'])
+                measures.drop6.set_trait('options', ['Decision 7'])
+                measures.drop7.set_trait('options', ['Decision 8'])
+                measures.drop8.set_trait('options', ['Decision 9'])
 
     # Change dropdowns based on drop4 selection
     def drop4_clicked(selection):
 
-        if 'Woody vegetation' in measures.drop4.options:
-            if selection.new == 'Yes':
-                measures.drop5.set_trait('options', ['Height >5m & Canopy >30%',
-                                                     'Yes', 'No'])
-                measures.drop6.set_trait('options', ['Decision 7'])
+        if 'Shrubs >30%?' in measures.drop4.options:
+            if selection.new == 'Yes': # Shrub
+                measures.drop5.set_trait('options', ['Shrub Phenology', 'Evergreen',
+                                                     'Deciduous', 'Mixed'])
+                measures.drop6.set_trait('options',
+                                         ['Density', 'Closed (60-70%)',
+                                          'Open (30-60%)', 'Sparse (<30%)'])
                 measures.drop7.set_trait('options', ['Decision 8'])
                 measures.drop8.set_trait('options', ['Decision 9'])
-            elif selection.new == 'No':
+            elif selection.new == 'No': # Herbaceous
                 measures.drop5.set_trait('options', ['Herbaceous Type',
                                                      'Grassland', 'Pasture',
                                                      'Row crops',
@@ -666,7 +694,7 @@ class measures(object):
         b1 = measures.b1
         b2 = measures.b2
         b3 = measures.b3
-        lft.click_event(target, m, current_band, df, sample_col, stretch_min, 
+        lft.click_event(target, m, current_band, df, sample_col, stretch_min,
                         stretch_max, b1, b2, b3)
 
     def add_image2(self, target):
@@ -686,7 +714,7 @@ class measures(object):
     def do_draw(self, action, geo_json):
         current_band = measures.band_list[measures.band_index2]
         doy_range = measures.doy_range
-        _col, _df = utils.handle_draw(action, geo_json, current_band, 
+        _col, _df = utils.handle_draw(action, geo_json, current_band,
                                       list(measures.xlim2.value), doy_range)
         measures.click_geojson = geo_json
         coord1 = measures.click_geojson['geometry']['coordinates'][0]
@@ -694,7 +722,7 @@ class measures(object):
         measures.click_coord_message.value = "Click Lat, Lon: {}, {}".format(coord2, coord1)
         measures.click_df = _df
         measures.click_col = _col
-        
+
         # Disable ts collection checkbox but calculate box in the background
         measures.click_train.value = False
         measures.click_trainbox = utils.calculate_clicked_bbox(geo_json)
@@ -721,6 +749,20 @@ class measures(object):
         coord1 = measures.samplept_geojson['coordinates'][0]
         coord2 = measures.samplept_geojson['coordinates'][1]
         measures.sample_coord_message.value = "Sample Lat, Lon: {}, {}".format(coord2, coord1)
+        lft.add_map_point(measures.samplept_geojson, zoom, measures.m, kml, name)
+
+    def go_to_lat_lon(b):
+        zoom = int(measures.zoom_box.value)
+        _longitude = float(measures.go_to_lon.value)
+        _latitude = float(measures.go_to_lat.value)
+        kml = measures.kml_link
+        name = 'Lat/Lon point'
+        ll_geo=shapely.geometry.Point(_longitude,_latitude)
+        ll_geojson = shapely.geometry.mapping(ll_geo)
+        measures.samplept_geojson = ll_geojson
+        coord1 = measures.samplept_geojson['coordinates'][0]
+        coord2 = measures.samplept_geojson['coordinates'][1]
+        measures.sample_coord_message.value = "Lat, Lon: {}, {}".format(coord2, coord1)
         lft.add_map_point(measures.samplept_geojson, zoom, measures.m, kml, name)
 
     # Get time series data for location.
@@ -887,28 +929,28 @@ class measures(object):
                 elif class1 == 'Bare':
                     bareType = measures.drop4.value
                 else:
-                    albedo = measures.drop4.value  #HERE
+                    albedo = measures.drop4.value
                     use = measures.drop5.value
                     height = measures.drop6.value
                     transport = measures.drop7.value
                     impervious = measures.drop8.value
             elif measures.drop2.value == 'Yes':  #Veg
-                density = measures.drop3.value
                 vegType1 = measures.veg_selector.value
                 vegType1 = [str(i) for i in vegType1]
                 vegType1 = ', '.join(vegType1)
-                if measures.drop4.value == 'No':  #Herbaceous
+                if measures.drop3.value == 'Yes':
+                    class1 = 'Forest'
+                    forestPhenology = measures.drop4.value
+                    leafType = measures.drop5.value
+                    location = measures.drop6.value
+                    density = measures.drop7.value
+                elif measures.drop4.value == 'Yes':
+                    class1 = 'Shrub'
+                    shrubType = measures.drop5.value
+                    density = measures.drop6.value
+                elif measures.drop4.value == 'No':
                     class1 = 'Herbaceous'
                     herbaceousType = measures.drop5.value
-                else:
-                    if measures.drop5.value == 'Yes':
-                        class1 = 'Forest'
-                        forestPhenology = measures.drop6.value
-                        leafType = measures.drop7.value
-                        location = measures.drop8.value
-                    elif measures.drop5.value == 'No':
-                        class1 = 'Shrub'
-                        shrubType = measures.drop6.value 
 
         conf = measures.confidence.value
         notes_value = measures.notes.value
@@ -928,7 +970,7 @@ class measures(object):
                        class1, waterType, bareType, albedo, use, height,
                        transport, impervious, density,
                        herbaceousType, shrubType, forestPhenology, leafType,
-                       location, vegType1, conf, notes_value, seg_type, 
+                       location, vegType1, conf, notes_value, seg_type,
                        direction, changeAgent, confCA, ca_other, seg_notes,
                        break_year, break_range1, break_range2)
 
@@ -944,10 +986,10 @@ class measures(object):
 
         # Save to drive
         sampleInputList = [str(idSample), str(lat), str(lon), str(year1),
-                           str(year2),  coverType, 
+                           str(year2),  coverType,
                            class1, waterType, bareType, albedo,
                            use, height, transport, impervious, density,
-                           herbaceousType, shrubType, forestPhenology, 
+                           herbaceousType, shrubType, forestPhenology,
                            leafType, location, vegType1, str(conf),
                            notes_value, seg_type, direction, changeAgent,
                            str(confCA), ca_other, seg_notes]
@@ -1012,7 +1054,7 @@ class measures(object):
         measures.veg_selector.disabled = True
         measures.years.set_trait('value', [1990, 1991])
         measures.confidence.set_trait('value', 0)
-                
+
         # Segment attrs
         measures.drop9.set_trait('value', 'Select type')
         measures.direction.set_trait('value', ('NA',))
@@ -1023,7 +1065,7 @@ class measures(object):
         measures.notes_seg_trend.value = 'Enter any useful or interesting \
                                          information about the Time Trend of \
                                          this sample'
-        
+
         # Break
         measures.break_check.value = False
         measures.break_year.set_trait('value', 1991)
@@ -1062,7 +1104,7 @@ class measures(object):
             measures.b_change_other.disabled = True
             measures.b_ca_confidence.disabled = True
             measures.notes_break.disabled = True
-    
+
     # Enable collection of TS box as training data
     def enable_ts_collection(b):
         if b.new:
@@ -1140,6 +1182,8 @@ class measures(object):
     lc3.on_hover(hover_event)
 
     idBox.on_submit(go_to_sample)
+    go_to_lat.on_submit(go_to_lat_lon)
+    go_to_lon.on_submit(go_to_lat_lon)
 
     # Mapping
     measure = ipyleaflet.MeasureControl(position='topleft',

@@ -323,6 +323,7 @@ def get_indices(df):
                       (df['NIR'] * 0.7940) + (df['SWIR1'] * -0.0002) + (df['SWIR2'] * -0.1446)
     df['WETNESS'] = (df['BLUE'] * 0.0315) + (df['GREEN'] * 0.2021) + (df['RED'] * 0.3102) +\
                     (df['NIR'] * 0.1594) + (df['SWIR1'] * -0.6806) + (df['SWIR2'] * -0.6109)
+    df['NDVI'] = ((df['NIR'] - df['RED']) / (df['NIR'] + df['RED'])) * 10000
 
     return df
 

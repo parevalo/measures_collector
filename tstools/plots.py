@@ -52,7 +52,7 @@ def make_text(value, placeholder, description, disabled=False, continuous_update
     return widg
 
 # Return a textbox floating integer widget
-def make_text_float(value, placeholder, description, disabled=False, continuous_update=True):
+def make_text_float(value, placeholder, description, disabled=False, continuous_update=True, layout=None):
 
     widg = widgets.FloatText(value=value, placeholder=placeholder, description=description, disabled=disabled,
                          continuous_update=continuous_update)
