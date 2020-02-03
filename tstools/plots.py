@@ -1,5 +1,5 @@
 import ipywidgets as widgets
-import bqplot, qgrid
+import bqplot
 
 # Functions for generating widgets
 
@@ -146,12 +146,6 @@ def make_bq_scale(scale_type, _min, _max):
 
     return scale
 
-# Make a table widget
-def make_table(table, show_toolbar=False):
-
-    table = qgrid.show_grid(table, show_toolbar=show_toolbar)
-
-    return table
 
 # Add time series to plot
 def add_plot_ts(df, plot, band='SWIR1', color_marks=None):

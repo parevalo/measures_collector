@@ -20,7 +20,7 @@ dependencies:
     - xarray>=0.10.7
     # Plotting
     - matplotlib
-    - bqplot
+    - bqplot<0.12
     # Interactive
     - nodejs
     - jupyter
@@ -32,7 +32,6 @@ dependencies:
     - flask
     - flask-sqlalchemy
     - gspread
-    - qgrid
     # GEE
     - oauth2client
     - pycrypto

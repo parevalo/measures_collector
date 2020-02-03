@@ -6,7 +6,7 @@ import tstools.sheets as sheets
 import tstools.leaflet_tools as lft
 import tstools.ccd as ccd_tools
 import ipyleaflet
-import os, qgrid, datetime, sqlite3, time
+import os, datetime, sqlite3, time
 import pandas as pd
 import tstools.plots as plots
 import ipywidgets as widgets
@@ -24,7 +24,6 @@ class measures(object):
         measures.band_index2 = 4
         measures.pyccd_flag = False
         measures.pyccd_flag2 = False
-        measures.table = None
         conn = sqlite3.connect(measures.dbPath)
         measures.current_id = measures.current_id
         measures.c = conn.cursor()
@@ -52,7 +51,6 @@ class measures(object):
     sample_df = pd.DataFrame()
     samplept_geojson = ''
     PyCCDdf = pd.DataFrame()
-    table = pd.DataFrame()
     band_list = ['BLUE', 'GREEN', 'RED', 'NIR', 'SWIR1', 'SWIR2', 'BRIGHTNESS',
                  'GREENNESS', 'WETNESS', 'NDVI']
     doy_range = [1, 365]
@@ -198,7 +196,6 @@ class measures(object):
     pyccd_button2 = plots.make_button(False, 'Run PyCCD 2', icon='')
     clear_layers = plots.make_button(False, 'Clear Map', icon='')
 
-    delete_rows = plots.make_button(False, 'Delete Last', icon='')
 
     # Validate
     valid = plots.make_valid(False, 'Not Saved', '')
@@ -216,8 +213,6 @@ class measures(object):
     kml_link = plots.make_html('KML:')
     error_label = plots.make_html('Load a point')
 
-    # Table
-    table_widget = qgrid.show_grid(table, show_toolbar=False)
 
 
     ###### Plots ######
@@ -303,20 +298,6 @@ class measures(object):
 
 
     ###### Functions ######
-
-    # Delete data highlighted in rows
-    def delete_data_rows(a):
-
-        measures.c.execute("DELETE FROM measures WHERE id = \
-                           (SELECT MAX(id) FROM measures)")
-        measures.change_table(0)
-        condition = measures.break_check.value
-
-        if condition is True:
-            measures.sheet2.delete_row(2)
-        else:
-            measures.sheet.delete_row(2)
-
 
     # Reset dropdowns
     def reset_drops():
@@ -572,7 +553,6 @@ class measures(object):
         measures.get_ts()
         measures.plot_ts(measures.lc2, 'ts')
         measures.plot_ts(measures.lc8, 'doy')
-        measures.change_table(0)
         measures.reset_everything()
         measures.click_train.set_trait('value', False)
         measures.valid.value = False
@@ -593,7 +573,6 @@ class measures(object):
         #measures.plot_ts()
         measures.plot_ts(measures.lc2, 'ts')
         measures.plot_ts(measures.lc8, 'doy')
-        measures.change_table(0)
         measures.reset_everything()
         measures.click_train.set_trait('value', False)
         measures.valid.value = False
@@ -628,19 +607,6 @@ class measures(object):
         measures.plot_ts(measures.lc2, 'ts')
         measures.plot_ts(measures.lc8, 'doy')
 
-    # Update the table based on current ID
-    def change_table(b):
-
-        # Get header
-        cursor = measures.c.execute('select * from measures')
-        names = list(map(lambda x: x[0], cursor.description))
-        previous_inputs = pd.DataFrame()
-        for i, row in enumerate(measures.c.execute("SELECT * FROM measures WHERE id = '%s'" % measures.current_id)):
-            previous_inputs[i] = row
-        previous_inputs = previous_inputs.T
-        if previous_inputs.shape[0] > 0:
-            previous_inputs.columns = names
-        measures.table_widget.df = previous_inputs
 
     # Functions for changing image stretch
     def change_image_band1(change):
@@ -1126,7 +1092,6 @@ class measures(object):
 
     click_train.observe(enable_ts_collection, 'value')
     break_check.observe(do_activate_break, 'value')
-    delete_rows.on_click(delete_data_rows)
     return_button.on_click(return_to_sample)
     save_button.on_click(do_save_sample)
     b_save_button.on_click(do_save_sample)
