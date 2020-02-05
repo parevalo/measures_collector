@@ -366,9 +366,7 @@ def get_color_list():
 def GetTileLayerUrl(ee_image_object):
 
     map_id = ee.Image(ee_image_object).getMapId()
-    tile_url_template = "https://earthengine.googleapis.com/map/{mapid}/{{z}}/{{x}}/{{y}}?token={token}"
-    return tile_url_template.format(**map_id)
-
+    return map_id["tile_fetcher"].url_format
 
 # Old
 # Convert a FeatureCollection into a pandas DataFrame
