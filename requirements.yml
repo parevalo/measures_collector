@@ -20,7 +20,7 @@ dependencies:
     - xarray>=0.10.7
     # Plotting
     - matplotlib
-    - bqplot<0.12
+    - bqplot==0.11.5
     # Interactive
     - nodejs
     - jupyter

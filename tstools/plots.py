@@ -103,7 +103,7 @@ def make_bq_plot(plot_type, x, y, scales, size, interactions, selected_style, un
                  display_legend=False, labels = [''], colors=['#43a2ca'], stroke_width=3, marker='circle'):
 
     if plot_type == 'scatter':
-        chart = bqplot.Scatter(x=x, y=x, scales=scales, size=size, interactions=interactions,
+        chart = bqplot.Scatter(x=x, y=y, scales=scales, size=size, interactions=interactions,
                                selected_style=selected_style, unselected_style=unselected_style,
                                display_legend=display_legend, labels=labels, marker=marker,colors=colors)
     elif plot_type == 'lines':
@@ -150,7 +150,7 @@ def make_bq_scale(scale_type, _min, _max):
 # Add time series to plot
 def add_plot_ts(df, plot, band='SWIR1', color_marks=None):
 
-    plot.x = df['datetime']
+    plot.x = df['datetime'].values
     plot.y = df[band]
     if color_marks is not None:
         plot.colors = list(df['color'].values)

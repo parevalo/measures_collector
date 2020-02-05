@@ -636,7 +636,7 @@ class measures(object):
         new_band = change['new']
         band_index = change['owner'].index
         measures.band_index2 = band_index
-        measures.lc3.x = measures.click_df['datetime']
+        measures.lc3.x = measures.click_df['datetime'].values
         measures.lc3.y = measures.click_df[new_band]
         #measures.plot_ts(measures.lc3, 'ts')
         measures.y_ay2.label = new_band
@@ -696,7 +696,7 @@ class measures(object):
         measures.lc6.y = []
         measures.lc7.x = []
         measures.lc7.y = []
-        measures.lc3.x = measures.click_df['datetime']
+        measures.lc3.x = measures.click_df['datetime'].values
         measures.lc3.y = measures.click_df[current_band]
         measures.valid.value = False
         measures.description = 'Not Saved'
@@ -1160,4 +1160,3 @@ class measures(object):
     m.add_control(dc)
     m.add_control(measure)
     m.add_control(ipyleaflet.LayersControl())
-
