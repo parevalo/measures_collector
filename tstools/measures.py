@@ -174,7 +174,7 @@ class measures(object):
 
     stretch_min = plots.make_text_float(0, 0, 'Min:')
     stretch_max = plots.make_text_float(6000, 6000, 'Max:')
-    zoom_box = plots.make_text_float(12, 12, 'Zoom:')
+    zoom_box = plots.make_text_float(18, 18, 'Zoom:')
     idBox = plots.make_text('0', '0', 'ID:')
     go_to_lat = plots.make_text('0', 'Lat','')
     go_to_lon = plots.make_text('0', 'Lon','')

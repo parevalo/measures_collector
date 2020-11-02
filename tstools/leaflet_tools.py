@@ -38,7 +38,7 @@ def add_map_point(data, zoom, m, kml, name):
 
     # Make geojson from data
     gjson = ipyleaflet.GeoJSON(data=data, name=name)
-
+    
     # Center map
     m.center = gjson.data['coordinates'][::-1]
 
@@ -55,6 +55,13 @@ def add_map_point(data, zoom, m, kml, name):
 
     # Update KML widget
     kml.value = "<a '_blank' rel='noopener noreferrer' href={}>KML Link</a>".format(kmlstr)
+
+    # Add pixel bounds
+    _bounds = utils.get_bounds(geo_point, ee.Projection("EPSG:4326")).getInfo()
+    pixel_bounds = ipyleaflet.Polyline(locations= _bounds['coordinates'],
+                                        name="Pixel")
+    m.add_layer(pixel_bounds)
+
 
     return
 

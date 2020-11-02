@@ -364,8 +364,9 @@ def get_color_list():
 
 # Get the URL for an earth engine image. TODO: Wrong file
 def GetTileLayerUrl(ee_image_object):
+    
+    map_id = ee.Image(ee_image_object).reproject(ee.Projection("EPSG:4326"), None, 30).getMapId()
 
-    map_id = ee.Image(ee_image_object).getMapId()
     return map_id["tile_fetcher"].url_format
 
 # Old
@@ -474,3 +475,11 @@ def calculate_clicked_bbox(geojson):
     target_proj = zone.get("CRS")
     bbox = click_geom.buffer(45, 0, target_proj).bounds(0.01, target_proj)
     return bbox
+
+# Calculate bounds of a Landsat pixel in a given projection
+def get_bounds(point, projection):
+    toProj = ee.Projection(projection).atScale(30)
+    c1 = point.transform(toProj, 1).coordinates().map(lambda p: ee.Number(p).floor())
+    c2 = c1.map(lambda p: ee.Number(p).add(1))
+    p2 =  ee.Geometry.LineString([c1, c2], toProj)
+    return p2.bounds()
